@@ -1,0 +1,2 @@
+# Default to debug compilation mode.
+build -c dbg
