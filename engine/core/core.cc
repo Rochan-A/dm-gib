@@ -8,49 +8,70 @@
 #include <GLFW/glfw3.h>
 
 #include "engine/core/core.h"
+#include "util/report/macros.h"
 
 namespace core {
 
-GLCore::GLCore(GlDebugCallback gl_callback, GlfwErrorCallback glfw_callback)
-    : glfw_error_callback_(std::move(glfw_callback)),
-      gl_debug_callback_(std::move(gl_callback)) {
-
-  if (glfw_error_callback_) {
-    glfwSetErrorCallback(
-        glfw_error_callback_.target<glfw_error_callback_type>());
-  }
+GLCore::GLCore(GlDebugCallback gl_debug_callback,
+               GLFWerrorfun glfw_error_callback)
+    : glfw_error_callback_(std::move(glfw_error_callback)),
+      gl_debug_callback_(std::move(gl_debug_callback)) {
 
   glfw_init_success_ = glfwInit();
+  ASSERT(glfw_init_success_ == GLFW_TRUE, "Failed to initialize GLFW!");
+  INFO("Successfully initialized GLFW");
 
-  // TODO(rochan): Do we need this? Move into window?
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  // Enable loggers if applicable.
+  EnableGlfwErrorLogging();
+  EnableGlErrorLogging();
 }
 
 GLCore::~GLCore() {
-  if (glfw_init_success_ == GLFW_TRUE) {
-    glfwTerminate();
-  }
+  ASSERT(glfw_init_success_ == GLFW_TRUE,
+         "GLFW failed to initialize, not calling glfwTerminate()");
+  glfwTerminate();
 }
 
-void GLCore::EnableGlfwErrorLogging() { glfw_error_logging_enabled_ = true; }
+void GLCore::EnableGlfwErrorLogging() {
+  if (!glfw_error_callback_) {
+    return;
+  }
+  glfwSetErrorCallback(glfw_error_callback_);
+  INFO("Set GLFW error callback.");
+}
 
-void GLCore::DisableGlfwErrorLogging() { glfw_error_logging_enabled_ = false; }
+void GLCore::DisableGlfwErrorLogging() {
+  glfw_error_logging_enabled_ = false;
+  glfwSetErrorCallback(nullptr);
+  INFO("Un-set OpenGL debug callback.");
+}
 
 void GLCore::EnableGlErrorLogging() {
   if (!gl_debug_callback_) {
     return;
   }
-  gl_debug_logging_enabled_ = true;
   glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback(gl_debug_callback_.target<gl_debug_callback_type>(),
-                         nullptr);
+  glDebugMessageCallback(gl_debug_callback_, nullptr);
+  INFO("Set OpenGL debug callback.");
 }
 
 void GLCore::DisableGlErrorLogging() {
   gl_debug_logging_enabled_ = false;
   glDisable(GL_DEBUG_OUTPUT);
+  INFO("Un-set OpenGL debug callback.");
+}
+
+// Move constructor
+GLCore::GLCore(GLCore &&other) noexcept
+    : glfw_error_logging_enabled_(other.glfw_error_logging_enabled_),
+      gl_debug_logging_enabled_(other.gl_debug_logging_enabled_),
+      glfw_init_success_(other.glfw_init_success_),
+      glfw_error_callback_(std::move(other.glfw_error_callback_)),
+      gl_debug_callback_(std::move(other.gl_debug_callback_)) {
+
+  other.glfw_error_logging_enabled_ = true;
+  other.gl_debug_logging_enabled_ = true;
+  other.glfw_init_success_ = GLFW_FALSE;
 }
 
 } // namespace core

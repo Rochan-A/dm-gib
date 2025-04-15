@@ -9,5 +9,7 @@ refresh_compile_commands(
         "@//..." : "",
         "//third_party/...": "",
         "//engine/...": "",
+        "//util/...": "",
+        "//gib/...": "",
     },
 )

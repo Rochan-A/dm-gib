@@ -1,17 +1,10 @@
 Checks: '-*,
  bugprone-*,
-/* cert-*, */
+-bugprone-easily-swappable-parameters,
 clang-analyzer-*,
 clang-diagnostic-*,
--clang-diagnostic-c++17-extensions,
 google-*,
--google-runtime-references,
--google-readability-braces-around-statements,
-hicpp-*,
--hicpp-braces-around-statements,
--hicpp-signed-bitwise,
-misc-*,
--misc-non-private-member-variables-in-classes,
+/* misc-*, */
 llvm-*,
 modernize-*,
 -modernize-use-trailing-return-type,
@@ -21,3 +14,4 @@ readability-*,
 -readability-magic-numbers,
 -readability-braces-around-statements,
 -readability-uppercase-literal-suffix'
+ -readability-identifier-length

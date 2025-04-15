@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/report/macros.h"
 #include <functional>
 #include <memory>
 
@@ -10,35 +11,32 @@
 
 namespace core {
 
-using gl_debug_callback_type = void(GLenum, GLenum, GLuint, GLenum, GLsizei,
-                                    const GLchar *, const void *);
+using GlDebugCallback = GLDEBUGPROC;
 
-using glfw_error_callback_type = void(int, const char *);
-using GlfwErrorCallback = std::function<glfw_error_callback_type>;
-
-using GlDebugCallback = std::function<gl_debug_callback_type>;
-
+// Callback that prints GLFW errors to stderr.
 inline void GlfwErrorPrintCallback(int error, const char *description) {
-  fprintf(stderr, "GLFW ERROR: %s [error code %d]\n", description, error);
+  WARNING("GLFW ERROR: {} [error code {}]\n", description, error);
 }
 
-inline void GLAPIENTRY GlErrorPrintCallback(GLenum source, GLenum type,
+// Callback that prints OpenGL errors to stderr.
+inline void GLAPIENTRY GlDebugPrintCallback(GLenum source, GLenum type,
                                             GLuint id, GLenum severity,
                                             GLsizei length,
                                             const GLchar *message,
                                             const void *user_param) {
   if (type == GL_DEBUG_TYPE_ERROR) {
-    fprintf(stderr, "GL ERROR: %s [error type = 0x%x, severity = 0x%x]\n",
-            message, type, severity);
+    WARNING("GL ERROR: {} [error type = 0x{}, severity = 0x{}]", message, type,
+            severity);
   }
 }
 
+// Class to initialize and manage core GLFW context.
 class GLCore {
 public:
-  explicit GLCore(GlDebugCallback gl_callback = {},
-                  GlfwErrorCallback glfw_callback = {});
-
-  [[nodiscard]] bool IsInit() const { return glfw_init_success_ == GLFW_TRUE; }
+  // If gl_callback or glfw_callback is set (default), set OpenGL and GLFW debug
+  // callbacks, respectively.
+  explicit GLCore(GlDebugCallback gl_debug_callback = GlDebugPrintCallback,
+                  GLFWerrorfun glfw_error_callback = GlfwErrorPrintCallback);
 
   void EnableGlfwErrorLogging();
 
@@ -48,10 +46,33 @@ public:
 
   void DisableGlErrorLogging();
 
-  static inline float GetTime() { return static_cast<float>(glfwGetTime()); }
+  bool IsInit() const { return glfw_init_success_ == GLFW_TRUE; }
+
+  inline float GetTime() { return static_cast<float>(glfwGetTime()); }
 
   ~GLCore();
 
+  // Move constructor
+  GLCore(GLCore &&other) noexcept;
+
+  // Move assignment operator
+  GLCore &operator=(GLCore &&other) noexcept {
+    if (this != &other) {
+
+      glfw_error_logging_enabled_ = other.glfw_error_logging_enabled_;
+      gl_debug_logging_enabled_ = other.gl_debug_logging_enabled_;
+      glfw_init_success_ = other.glfw_init_success_;
+      glfw_error_callback_ = std::move(other.glfw_error_callback_);
+      gl_debug_callback_ = std::move(other.gl_debug_callback_);
+
+      other.glfw_error_logging_enabled_ = true;
+      other.gl_debug_logging_enabled_ = true;
+      other.glfw_init_success_ = GLFW_FALSE;
+    }
+    return *this;
+  }
+
+  // Disallow copy
   GLCore(const GLCore &) = delete;
   const GLCore &operator=(const GLCore &) = delete;
 
@@ -64,7 +85,7 @@ private:
 
   int glfw_init_success_{GLFW_FALSE};
 
-  GlfwErrorCallback glfw_error_callback_;
+  GLFWerrorfun glfw_error_callback_;
 
   GlDebugCallback gl_debug_callback_;
 };

@@ -1,0 +1,8 @@
+cc_library(
+  name = "macro",
+  hdrs = ["macro.h"],
+  deps = [
+    "@fmt",
+  ],
+  visibility = ["//visibility:public"],
+)

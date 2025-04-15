@@ -1,19 +1,9 @@
 module(name = "dm-gib")
 
-# Hedron's Compile Commands Extractor for Bazel
-# https://github.com/hedronvision/bazel-compile-commands-extractor
-bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
-git_override(
-    module_name = "hedron_compile_commands",
-    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
-    commit = "4f28899228fb3ad0126897876f147ca15026151e",
-    # Replace the commit hash (above) with the latest (https://github.com/hedronvision/bazel-compile-commands-extractor/commits/main).
-    # Even better, set up Renovate and let it do the work for you (see "Suggestion: Updates" in the README).
-)
-
 bazel_dep(name = "googletest", version = "1.16.0")
 bazel_dep(name = "platforms", version = "0.0.11")
 bazel_dep(name = "apple_support", version = "1.21.1", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "fmt", version = "11.1.4")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -23,4 +13,15 @@ http_archive(
     build_file = "@//:glfw.BUILD",
     strip_prefix = "glfw-3.4",
     sha256 = "b5ec004b2712fd08e8861dc271428f048775200a2df719ccf575143ba749a3e9"
+)
+
+# Hedron's Compile Commands Extractor for Bazel
+# https://github.com/hedronvision/bazel-compile-commands-extractor
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+    commit = "4f28899228fb3ad0126897876f147ca15026151e",
+    # Replace the commit hash (above) with the latest (https://github.com/hedronvision/bazel-compile-commands-extractor/commits/main).
+    # Even better, set up Renovate and let it do the work for you (see "Suggestion: Updates" in the README).
 )
