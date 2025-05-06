@@ -1,6 +1,6 @@
 cc_library(
-  name = "macro",
-  hdrs = ["macro.h"],
+  name = "macros",
+  hdrs = ["macros.h"],
   deps = [
     "@fmt",
   ],

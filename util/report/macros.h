@@ -49,38 +49,15 @@ inline const std::string GetStackTrace(int skip_frames = 2) {
   return result;
 }
 
-// Returns the current system time as a string, i.e., "2025-04-13 02:03:43".
+// Returns the current system time as a string, i.e., "2025-04-1302:03:43".
 inline std::string CurrentSystemTimeString() {
   using SystemClock = std::chrono::system_clock;
   auto now = SystemClock::now();
   std::time_t now_c = SystemClock::to_time_t(now);
 
   char buf[100];
-  std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", std::localtime(&now_c));
+  std::strftime(buf, sizeof(buf), "%Y-%m-%d%H:%M:%S", std::localtime(&now_c));
   return {buf};
-}
-
-// Logs a message with color coding based on the level.
-inline void LogMessage(const char *level, const char *file, int line,
-                       const char *func, const std::string &msg) {
-  std::string system_time = CurrentSystemTimeString();
-  double monotonic_time = MonotonicTimeSeconds();
-
-  // Pick color by level.
-  std::string color_code;
-  if (std::strcmp(level, "INFO") == 0) {
-    color_code = "\033[34m"; // Blue
-  } else if (std::strcmp(level, "WARNING") == 0) {
-    color_code = "\033[33m"; // Yellow
-  } else if (std::strcmp(level, "DEBUG") == 0) {
-    color_code = "\033[32m"; // Green
-  } else {
-    color_code = "\033[0m"; // Default
-  }
-
-  std::cerr << fmt::format("{}[{}] {} | {:.9f}s | {}:{} ({}) - {}\033[0m\n",
-                           color_code, level, system_time, monotonic_time, file,
-                           line, func, msg);
 }
 
 // Throws a std::runtime_error with a stack trace.
@@ -94,10 +71,31 @@ inline void ThrowFatalError(const char *file, int line, const char *func,
   throw std::runtime_error(full_message);
 }
 
+// ANSI colours (bright so they show up on light or dark themes)
+namespace ansi {
+constexpr const char *kReset = "\x1b[0m";
+constexpr const char *kBlue = "\x1b[1;34m";
+constexpr const char *kYellow = "\x1b[1;33m";
+constexpr const char *kGreen = "\x1b[1;32m";
+constexpr const char *kRed = "\x1b[1;31m";
+} // namespace ansi
+
+inline void LogMessage(const char *level, const char *file, int line,
+                       const char *func, const std::string &msg) {
+  const char *color = (level[0] == 'I')   ? ansi::kBlue
+                      : (level[0] == 'W') ? ansi::kYellow
+                      : (level[0] == 'D') ? ansi::kGreen
+                      : (level[0] == 'A') ? ansi::kRed
+                                          : ansi::kReset;
+
+  std::cerr << fmt::format("{}{} {} [{:11.6f}] {}:{} {}{}\n", color, level,
+                           CurrentSystemTimeString(), MonotonicTimeSeconds(),
+                           file, line, msg, ansi::kReset);
+}
+
 } // namespace logging
 
-// Always define kdebug_break in case it is ever needed outside assertions (i.e
-// fatal log errors) Try via __has_builtin first.
+// kdebug_break  (works on GCC/Clang/MSVC; harmless on others)
 #if defined(__has_builtin) && !defined(__ibmxl__)
 #if __has_builtin(__builtin_debugtrap)
 #define kdebug_break() __builtin_debugtrap()
@@ -105,19 +103,14 @@ inline void ThrowFatalError(const char *file, int line, const char *func,
 #define kdebug_break() __debugbreak()
 #endif
 #endif
-
-// If not setup, try the old way.
 #if !defined(kdebug_break)
 #if defined(__clang__) || defined(__gcc__)
-/** @brief Causes a debug breakpoint to be hit. */
 #define kdebug_break() __builtin_trap()
 #elif defined(_MSC_VER)
 #include <intrin.h>
-/** @brief Causes a debug breakpoint to be hit. */
 #define kdebug_break() __debugbreak()
 #else
-// Fall back to x86/x86_64
-#define kdebug_break() asm { int 3 }
+#define kdebug_break() ((void)0)
 #endif
 #endif
 
@@ -125,12 +118,12 @@ inline void ThrowFatalError(const char *file, int line, const char *func,
   ::logging::LogMessage("D", __FILE__, __LINE__, __func__,                     \
                         fmt::format(msg, ##__VA_ARGS__))
 
-#define INFO(msg, ...)                                                         \
-  ::logging::LogMessage("I", __FILE__, __LINE__, __func__,                     \
-                        fmt::format(msg, ##__VA_ARGS__))
-
 #define WARNING(msg, ...)                                                      \
   ::logging::LogMessage("W", __FILE__, __LINE__, __func__,                     \
+                        fmt::format(msg, ##__VA_ARGS__))
+
+#define INFO(msg, ...)                                                         \
+  ::logging::LogMessage("I", __FILE__, __LINE__, __func__,                     \
                         fmt::format(msg, ##__VA_ARGS__))
 
 #define THROW_FATAL(msg, ...)                                                  \
@@ -140,10 +133,13 @@ inline void ThrowFatalError(const char *file, int line, const char *func,
 #define ASSERT(expr, msg, ...)                                                 \
   do {                                                                         \
     if (!(expr)) {                                                             \
+      ::logging::LogMessage("A", __FILE__, __LINE__, __func__,                 \
+                            fmt::format("Assertion failed: {}. {}", #expr,     \
+                                        fmt::format(msg, ##__VA_ARGS__)));     \
+      kdebug_break();                                                          \
       ::logging::ThrowFatalError(                                              \
           __FILE__, __LINE__, __func__,                                        \
-          fmt::format("Assertion failed: {}. Message: {}", #expr,              \
+          fmt::format("Assertion failed: {}. {}", #expr,                       \
                       fmt::format(msg, ##__VA_ARGS__)));                       \
-      kdebug_break();                                                          \
     }                                                                          \
   } while (0)
