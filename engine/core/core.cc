@@ -1,9 +1,4 @@
 #include "engine/core/core.h"
-#include "util/report/macros.h"
-
-#include <memory>
-#include <thread>
-#include <utility>
 
 namespace core {
 

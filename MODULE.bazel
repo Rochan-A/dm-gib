@@ -15,6 +15,22 @@ http_archive(
     sha256 = "b5ec004b2712fd08e8861dc271428f048775200a2df719ccf575143ba749a3e9"
 )
 
+http_archive(
+    name = "tracy",
+    url = "https://github.com/wolfpld/tracy/archive/refs/tags/v0.11.1.tar.gz",
+    strip_prefix = "tracy-0.11.1",
+    build_file = "@//:tracy.BUILD",
+    sha256 = "2c11ca816f2b756be2730f86b0092920419f3dabc7a7173829ffd897d91888a1",
+)
+
+http_archive(
+    name = "glm",
+    url = "https://github.com/g-truc/glm/archive/refs/tags/1.0.1.tar.gz",
+    strip_prefix = "glm-1.0.1",
+    build_file = "@//:glm.BUILD",
+    sha256 = "9f3174561fd26904b23f0db5e560971cbf9b3cbda0b280f04d5c379d03bf234c",
+)
+
 # Hedron's Compile Commands Extractor for Bazel
 # https://github.com/hedronvision/bazel-compile-commands-extractor
 bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
@@ -22,6 +38,4 @@ git_override(
     module_name = "hedron_compile_commands",
     remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
     commit = "4f28899228fb3ad0126897876f147ca15026151e",
-    # Replace the commit hash (above) with the latest (https://github.com/hedronvision/bazel-compile-commands-extractor/commits/main).
-    # Even better, set up Renovate and let it do the work for you (see "Suggestion: Updates" in the README).
 )
