@@ -12,15 +12,16 @@
 #include <cstring>
 #include <execinfo.h>
 
+#include "util/time/time.h"
+
 namespace logging {
 
-// A static initialization for program start time. This ensures it's set once.
-static const auto kProgramStart = std::chrono::steady_clock::now();
+// Static initialization for program start time.
+static const auto kProgramStart = time_util::now();
 
 // Returns the elapsed time (in seconds) since the program started.
-inline const double MonotonicTimeSeconds() {
-  auto diff = std::chrono::steady_clock::now() - kProgramStart;
-  return std::chrono::duration<double>(diff).count();
+inline const float MonotonicTimeSeconds() {
+  return static_cast<float>(time_util::elapsed_sec(kProgramStart).count());
 }
 
 // Returns a stack trace.

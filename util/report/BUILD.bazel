@@ -3,6 +3,7 @@ cc_library(
   hdrs = ["macros.h"],
   deps = [
     "@fmt",
+    "//util/time:time",
   ],
   visibility = ["//visibility:public"],
 )
