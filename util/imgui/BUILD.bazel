@@ -1,0 +1,12 @@
+cc_library(
+  name = "imgui_window",
+  srcs = ["imgui_window.cc"],
+  hdrs = ["imgui_window.h"],
+  deps = [
+    "//third_party/glad:glad",
+    "@glfw",
+    "//util/report:macros",
+    "//third_party/imgui:imgui",
+  ],
+  visibility = ["//visibility:public"],
+)

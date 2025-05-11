@@ -30,6 +30,7 @@ cc_library(
     "//engine/core:core",
     "//util/report:macros",
     "//util/time:downsampler",
+    ":input"
   ],
   visibility = ["//visibility:public"],
 )

@@ -1,0 +1,9 @@
+cc_binary(
+    name = "gib",
+    srcs = ["gib.cc"],
+    deps = [
+        "//third_party/concise_args:concise_args",
+        "//gib:game",
+    ],
+    visibility = ["//visibility:public"],
+)

@@ -1,4 +1,14 @@
 cc_library(
+  name = "error",
+  hdrs = ["error.h"],
+  deps = [
+    ":macros",
+    "//third_party/glad:glad",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
   name = "macros",
   hdrs = ["macros.h"],
   deps = [

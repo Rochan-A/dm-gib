@@ -21,7 +21,8 @@ static const auto kProgramStart = time_util::now();
 
 // Returns the elapsed time (in seconds) since the program started.
 inline const float MonotonicTimeSeconds() {
-  return static_cast<float>(time_util::elapsed_sec(kProgramStart).count());
+  return static_cast<float>(time_util::elapsed_usec(kProgramStart).count() /
+                            1000000.f);
 }
 
 // Returns a stack trace.
@@ -50,14 +51,14 @@ inline const std::string GetStackTrace(int skip_frames = 2) {
   return result;
 }
 
-// Returns the current system time as a string, i.e., "2025-04-1302:03:43".
+// Returns the current system time as a string, i.e., "2025-04-13T02:03:43".
 inline std::string CurrentSystemTimeString() {
   using SystemClock = std::chrono::system_clock;
   auto now = SystemClock::now();
   std::time_t now_c = SystemClock::to_time_t(now);
 
   char buf[100];
-  std::strftime(buf, sizeof(buf), "%Y-%m-%d%H:%M:%S", std::localtime(&now_c));
+  std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", std::localtime(&now_c));
   return {buf};
 }
 
