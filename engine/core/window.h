@@ -165,14 +165,14 @@ public:
   }
   void DisableAlphaBlending() { glDisable(GL_BLEND); }
 
-  // void EnableFaceCull() { glEnable(GL_CULL_FACE); }
-  // void DisableFaceCull() { glDisable(GL_CULL_FACE); }
+  void EnableFaceCull() { glEnable(GL_CULL_FACE); }
+  void DisableFaceCull() { glDisable(GL_CULL_FACE); }
 
   void EnableSeamlessCubemap() { glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); }
   void DisableSeamlessCubemap() { glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS); }
 
-  // void CullFrontFaces() { glCullFace(GL_FRONT); }
-  // void CullBackFaces() { glCullFace(GL_BACK); }
+  void CullFrontFaces() { glCullFace(GL_FRONT); }
+  void CullBackFaces() { glCullFace(GL_BACK); }
 
   void EnableResizeUpdates();
   void DisableResizeUpdates();

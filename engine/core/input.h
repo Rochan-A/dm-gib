@@ -15,4 +15,19 @@ enum class MouseButtonBehavior {
   CAPTURE_MOUSE,
 };
 
+class InputManager {
+public:
+  InputManager() = default;
+
+  ~InputManager() = default;
+
+  InputManager(InputManager &&other) noexcept;
+  InputManager &operator=(InputManager &&other) noexcept;
+
+  InputManager(const InputManager &) = delete;
+  const InputManager &operator=(const InputManager &) = delete;
+
+private:
+};
+
 } // namespace core

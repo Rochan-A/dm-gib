@@ -1,0 +1,8 @@
+cc_library(
+  name = "camera",
+  hdrs = ["camera.h"],
+  deps = [
+    "//third_party/glad:glad",
+  ],
+  visibility = ["//visibility:public"],
+)
