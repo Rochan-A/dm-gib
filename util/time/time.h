@@ -10,7 +10,6 @@ namespace time_util {
 typedef std::chrono::steady_clock::time_point TimePoint;
 typedef std::chrono::nanoseconds DurationNsec;
 typedef std::chrono::microseconds DurationUsec;
-typedef std::chrono::seconds DurationSec;
 
 inline const TimePoint now() noexcept {
   return std::chrono::steady_clock::now();
@@ -25,8 +24,8 @@ constexpr inline DurationUsec to_usec(DurationNsec d) noexcept {
 }
 
 template <class Duration>
-constexpr inline double to_seconds(Duration d) noexcept {
-  return std::chrono::duration<double>(d).count();
+constexpr inline float to_seconds(Duration d) noexcept {
+  return std::chrono::duration<float>(d).count();
 }
 
 inline DurationNsec elapsed_nsec(TimePoint start,
