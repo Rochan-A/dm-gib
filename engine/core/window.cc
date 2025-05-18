@@ -1,12 +1,8 @@
 #include "engine/core/window.h"
-#include "util/time/downsampler.h"
-#include <chrono>
-#include <cstddef>
-#include <utility>
 
-namespace core {
+namespace gib {
 
-Window::Window(std::shared_ptr<core::GLCore> &core, const std::string title,
+Window::Window(std::shared_ptr<GLCore> &core, const std::string title,
                const int width, const int height, const int samples,
                const float fps_report_dt)
     : fps_tracker(fps_report_dt), title_{title}, core_(core) {
@@ -49,40 +45,8 @@ Window::Window(std::shared_ptr<core::GLCore> &core, const std::string title,
     glEnable(GL_MULTISAMPLE);
   }
 
-  // Enable a few options by default.
-  EnableVsync();
-  EnableDepthTest();
-  EnableAlphaBlending();
-  EnableSeamlessCubemap();
   EnableResizeUpdates();
   INFO("Window setup complete.");
-}
-
-Window::Window(Window &&other) noexcept
-    : fps_tracker(other.fps_tracker), fullscreen_(other.fullscreen_),
-      title_(std::move(other.title_)),
-      context_initialized_(other.context_initialized_),
-      glfw_window_ptr_(other.glfw_window_ptr_), monitor_(other.monitor_) {
-
-  other.glfw_window_ptr_ = nullptr;
-  other.monitor_ = nullptr;
-  other.context_initialized_ = false;
-}
-
-Window &Window::operator=(Window &&other) noexcept {
-  if (this != &other) {
-    fullscreen_ = other.fullscreen_;
-    title_ = other.title_;
-    context_initialized_ = other.context_initialized_;
-    glfw_window_ptr_ = other.glfw_window_ptr_;
-    monitor_ = other.monitor_;
-    fps_tracker = other.fps_tracker;
-
-    other.glfw_window_ptr_ = nullptr;
-    other.monitor_ = nullptr;
-    other.context_initialized_ = false;
-  }
-  return *this;
 }
 
 GLFWwindow *Window::GetWindow() {
@@ -160,4 +124,4 @@ void Window::Tick(const WindowTick &window_tick) {
   fps_tracker.Tick(window_tick);
 }
 
-} // namespace core
+} // namespace gib

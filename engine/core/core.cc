@@ -1,6 +1,6 @@
 #include "engine/core/core.h"
 
-namespace core {
+namespace gib {
 
 // Callback that prints GLFW errors to stderr.
 inline void GlfwErrorPrintCallback(int error, const char *description) {
@@ -93,4 +93,4 @@ GLCore &GLCore::operator=(GLCore &&other) noexcept {
   return *this;
 }
 
-} // namespace core
+} // namespace gib

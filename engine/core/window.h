@@ -1,9 +1,5 @@
 #pragma once
 
-#include <chrono>
-#include <optional>
-#include <string>
-
 #define GLAD_GL_IMPLEMENTATION
 #include "third_party/glad/glad.h"
 #define GLFW_INCLUDE_NONE
@@ -12,10 +8,10 @@
 #include "engine/core/core.h"
 #include "engine/core/window_util.h"
 #include "util/report/macros.h"
-#include "util/time/downsampler.h"
-#include "util/time/time.h"
 
-namespace core {
+#include "engine/core/types.h"
+
+namespace gib {
 
 // Handles Glfw window and its properties.
 class Window {
@@ -27,8 +23,8 @@ public:
 
   ~Window() = default;
 
-  Window(Window &&other) noexcept;
-  Window &operator=(Window &&other) noexcept;
+  Window(Window &&other) = delete;
+  Window &operator=(Window &&other) = delete;
 
   Window(const Window &) = delete;
   const Window &operator=(const Window &) = delete;
@@ -40,6 +36,10 @@ public:
   // Returns pointer to GLFW window.
   GLFWwindow *GetWindow();
 
+  const float GetAvgFps() const;
+
+  void Tick(const WindowTick &window_tick);
+
   const WindowSize GetWindowSize();
   void SetWindowSize(int width, int height);
 
@@ -49,6 +49,9 @@ public:
   void MakeWindowed();
 
   const float GetAspectRatio();
+
+  void EnableResizeUpdates();
+  void DisableResizeUpdates();
 
   void EnableVsync() { glfwSwapInterval(1); }
   void DisableVsync() { glfwSwapInterval(0); }
@@ -95,13 +98,6 @@ public:
   void CullFrontFaces() { glCullFace(GL_FRONT); }
   void CullBackFaces() { glCullFace(GL_BACK); }
 
-  void EnableResizeUpdates();
-  void DisableResizeUpdates();
-
-  const float GetAvgFps() const;
-
-  void Tick(const WindowTick &window_tick);
-
   FpsTracker fps_tracker;
 
 private:
@@ -119,4 +115,4 @@ private:
   std::shared_ptr<GLCore> core_;
 };
 
-} // namespace core
+} // namespace gib

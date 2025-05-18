@@ -1,0 +1,30 @@
+cc_library(
+  name = "types",
+  hdrs = ["types.h"],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "compiler",
+  hdrs = ["compiler.h"],
+  srcs = ["compiler.cc"],
+  deps = [
+    ":types",
+    "//third_party/glad:glad",
+    "//util/report:macros",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "shader",
+  hdrs = ["shader.h"],
+  srcs = ["shader.cc"],
+  deps = [
+    ":types",
+    ":compiler",
+    "//third_party/glad:glad",
+    "//util/report:macros",
+  ],
+  visibility = ["//visibility:public"],
+)

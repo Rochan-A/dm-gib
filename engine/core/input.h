@@ -1,15 +1,19 @@
+#pragma once
+
 #include "util/report/macros.h"
 #include <array>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include "engine/core/types.h"
+
 // Number of keys.
 static constexpr int kNumKeys = GLFW_KEY_LAST + 1;
 // Number of mouse buttons.
 static constexpr int kNumMouseButtons = GLFW_MOUSE_BUTTON_LAST + 1;
 
-namespace core {
+namespace gib {
 
 enum class MouseButtonBehavior : unsigned char {
   NONE,
@@ -32,11 +36,6 @@ enum class MouseButtonAction : unsigned char {
 };
 
 enum class KeyAction : unsigned char { UNKNOWN, PRESS, REPEAT, RELEASE };
-
-struct Offset {
-  float x{0.f};
-  float y{0.f};
-};
 
 struct Input {
   std::array<KeyAction, kNumKeys> key_state{};
@@ -261,4 +260,4 @@ private:
   GLFWwindow *glfw_window_ptr_{nullptr};
 };
 
-} // namespace core
+} // namespace gib

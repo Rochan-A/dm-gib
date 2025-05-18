@@ -7,7 +7,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-namespace core {
+namespace gib {
 
 // Class to initialize and manage core GLFW context.
 class GLCore {
@@ -46,4 +46,4 @@ private:
   int glfw_init_success_{GLFW_FALSE};
 };
 
-} // namespace core
+} // namespace gib

@@ -6,7 +6,7 @@
 
 #include "util/report/macros.h"
 
-namespace core {
+namespace gib {
 
 class DoubleBuffer {
 public:
@@ -80,4 +80,4 @@ private:
   RawBuffer secondary_buf_;
 };
 
-} // namespace core
+} // namespace gib

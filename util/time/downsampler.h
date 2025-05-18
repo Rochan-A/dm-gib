@@ -9,7 +9,7 @@ namespace time_util {
 
 constexpr inline DurationUsec SecondsToUsec(float s) {
   return std::chrono::duration_cast<DurationUsec>(
-      std::chrono::duration<double>(s));
+      std::chrono::duration<float>(s));
 }
 
 constexpr inline float UsecToSecondsf(DurationUsec d) {
@@ -52,38 +52,24 @@ public:
 
   // Fast-path: update & decide.  Returns true if we should “process”.
   bool UpdateAndCheckIfProcess(TimePoint current_tp) {
-    if (processing_dt_.count() < 0)
-      return false; // disabled
+    if (processing_dt_.count() < 0) {
+      return false;
+    }
 
-    if (!initialized_) { // first call
+    if (!initialized_) {
       initialized_ = true;
       last_process_ = current_tp;
       next_process_ = current_tp + processing_dt_;
       return !skip_first_call_;
     }
 
-    if (current_tp < next_process_)
+    if (current_tp < next_process_) {
       return false;
+    }
 
     last_process_ = current_tp;
     next_process_ = current_tp + processing_dt_;
     return true;
-  }
-
-  // Read-only check (cheap) – does *not* move internal state.
-  bool CheckIfProcess(TimePoint current_tp, bool allow_initialization = false) {
-    if (processing_dt_.count() < 0)
-      return false;
-
-    if (!initialized_) {
-      if (allow_initialization) {
-        initialized_ = true;
-        last_process_ = current_tp;
-        next_process_ = current_tp + processing_dt_;
-      }
-      return !skip_first_call_ && allow_initialization;
-    }
-    return current_tp >= next_process_;
   }
 
   float GetProcessingDt() const { return UsecToSecondsf(processing_dt_); }

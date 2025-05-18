@@ -17,6 +17,7 @@ cc_library(
     "//util/report:macros",
     "//util/time:downsampler",
     "//util/time:time",
+    ":types",
   ],
   visibility = ["//visibility:public"],
 )
@@ -27,6 +28,7 @@ cc_library(
   deps = [
     "//third_party/glad:glad",
     "@glfw",
+    ":types",
   ],
   visibility = ["//visibility:public"],
 )
@@ -41,7 +43,14 @@ cc_library(
     "//engine/core:core",
     "//util/report:macros",
     "//util/time:downsampler",
-    ":window_util"
+    ":window_util",
+    ":types",
   ],
   visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "types",
+  hdrs = ["types.h"],
+  visibility = ["//visibility:public"]
 )

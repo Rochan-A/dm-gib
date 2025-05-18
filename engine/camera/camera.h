@@ -7,9 +7,16 @@
 #include "third_party/glm/gtc/matrix_transform.hpp"
 #include "third_party/glm/gtc/type_ptr.hpp"
 
-namespace core {
+namespace gib {
 
-enum class Directions { kForward, kBackward, kLeft, kRight, kUp, kDown };
+enum class Directions : unsigned char {
+  FORWARD,
+  BACKWARD,
+  LEFT,
+  RIGHT,
+  UP,
+  DOWN
+};
 
 class Camera {
 public:
@@ -24,22 +31,22 @@ public:
   void ProcessKeyboard(Directions direction, float dlt_time) {
     float dlt_dis = dlt_time * velocity_;
     switch (direction) {
-    case Directions::kForward:
+    case Directions::FORWARD:
       position_ += dlt_dis * front_;
       break;
-    case Directions::kBackward:
+    case Directions::BACKWARD:
       position_ -= dlt_dis * front_;
       break;
-    case Directions::kLeft:
+    case Directions::LEFT:
       position_ -= glm::normalize(glm::cross(front_, up_)) * dlt_dis;
       break;
-    case Directions::kRight:
+    case Directions::RIGHT:
       position_ += glm::normalize(glm::cross(front_, up_)) * dlt_dis;
       break;
-    case Directions::kUp:
+    case Directions::UP:
       position_ += dlt_dis * up_;
       break;
-    case Directions::kDown:
+    case Directions::DOWN:
       position_ -= dlt_dis * up_;
       break;
     default:
@@ -90,4 +97,4 @@ private:
   float yaw_ = -90.0f;
   float pitch_ = 0.0f;
 };
-} // namespace core
+} // namespace gib
