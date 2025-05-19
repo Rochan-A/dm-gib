@@ -5,7 +5,7 @@
 #define GLAD_GL_IMPLEMENTATION
 #include "third_party/glad/glad.h"
 
-static std::string GlErrorToString(GLenum error) {
+static const std::string GlErrorToString(const GLenum &error) {
   switch (error) {
   case GL_NO_ERROR:
     return "NO_ERROR";

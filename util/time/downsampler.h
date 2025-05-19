@@ -7,37 +7,27 @@
 
 namespace time_util {
 
-constexpr inline DurationUsec SecondsToUsec(float s) {
-  return std::chrono::duration_cast<DurationUsec>(
-      std::chrono::duration<float>(s));
-}
-
-constexpr inline float UsecToSecondsf(DurationUsec d) {
-  return static_cast<float>(d.count()) * 1e-6f;
-}
-
 class DownSampler {
 public:
   DownSampler() = default;
 
-  explicit DownSampler(float dt_s, bool skip_first_call = false) {
+  explicit DownSampler(const float dt_s, const bool skip_first_call = false) {
     Reset(dt_s, skip_first_call);
   }
 
   ~DownSampler() = default;
 
-  void Reset(float dt_s, bool skip_first_call = false) {
-    processing_dt_ = SecondsToUsec(dt_s);
+  void Reset(const float dt_s, const bool skip_first_call = false) {
+    processing_dt_ = seconds_to_usec(dt_s);
     skip_first_call_ = skip_first_call;
     initialized_ = false;
-    last_process_ = TimePoint{};
-    next_process_ = TimePoint{};
   }
 
   void Reset() { Reset(GetProcessingDt(), skip_first_call_); }
-  void SetDt(float dt_s) { processing_dt_ = SecondsToUsec(dt_s); }
+  void SetDt(const float dt_s) { processing_dt_ = seconds_to_usec(dt_s); }
 
-  void Update(TimePoint current_tp, bool allow_initialization = false) {
+  void Update(const TimePoint &current_tp,
+              const bool allow_initialization = false) {
     if (!initialized_) {
       if (allow_initialization) {
         initialized_ = true;
@@ -51,7 +41,7 @@ public:
   }
 
   // Fast-path: update & decide.  Returns true if we should “process”.
-  bool UpdateAndCheckIfProcess(TimePoint current_tp) {
+  bool UpdateAndCheckIfProcess(const TimePoint &current_tp) {
     if (processing_dt_.count() < 0) {
       return false;
     }
@@ -72,7 +62,7 @@ public:
     return true;
   }
 
-  float GetProcessingDt() const { return UsecToSecondsf(processing_dt_); }
+  float GetProcessingDt() const { return to_seconds(processing_dt_); }
   bool Initialized() const { return initialized_; }
   bool GetSkipFirstTime() const { return skip_first_call_; }
   TimePoint LastTimeProcessed() const { return last_process_; }

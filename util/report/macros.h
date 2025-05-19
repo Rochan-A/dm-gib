@@ -7,7 +7,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <thread>
 
 #include <cstring>
 #include <execinfo.h>
@@ -21,12 +20,11 @@ static const auto kProgramStart = time_util::now();
 
 // Returns the elapsed time (in seconds) since the program started.
 inline const float MonotonicTimeSeconds() {
-  return static_cast<float>(time_util::elapsed_usec(kProgramStart).count() /
-                            1000000.f);
+  return time_util::to_seconds(time_util::elapsed_usec(kProgramStart).count());
 }
 
 // Returns a stack trace.
-inline const std::string GetStackTrace(int skip_frames = 2) {
+inline const std::string GetStackTrace(const int skip_frames = 2) {
   static const int kMaxFrames = 64;
   void *addr_list[kMaxFrames + 1];
 
@@ -82,7 +80,7 @@ constexpr const char *kGreen = "\x1b[1;32m";
 constexpr const char *kRed = "\x1b[1;31m";
 } // namespace ansi
 
-inline void LogMessage(const char *level, const char *file, int line,
+inline void LogMessage(const char *level, const char *file, const int line,
                        const char *func, const std::string &msg) {
   const char *color = (level[0] == 'I')   ? ansi::kBlue
                       : (level[0] == 'W') ? ansi::kYellow

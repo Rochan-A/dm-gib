@@ -4,8 +4,16 @@ cc_library(
   hdrs = ["imgui_window.h"],
   deps = [
     "//third_party/glad:glad",
-    "@glfw",
     "//util/report:macros",
+    "//third_party/imgui:imgui",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "imgui_util",
+  hdrs = ["imgui_util.h"],
+  deps = [
     "//third_party/imgui:imgui",
   ],
   visibility = ["//visibility:public"],
