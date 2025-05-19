@@ -1,0 +1,17 @@
+cc_library(
+  name = "types",
+  hdrs = ["types.h"],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "vertex_array",
+  hdrs = ["vertex_array.h"],
+  srcs = ["vertex_array.cc"],
+  deps = [
+    ":types",
+    "//third_party/glad:glad",
+    "//util/report:macros",
+  ],
+  visibility = ["//visibility:public"],
+)

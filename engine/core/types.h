@@ -1,7 +1,5 @@
 #pragma once
 
-#include "third_party/glm/glm.hpp"
-
 namespace gib {
 
 struct WindowSize {

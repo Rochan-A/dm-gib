@@ -46,7 +46,7 @@ unsigned int ShaderCompiler::Compile(const ShaderSource &source,
     char error[512];
     glGetShaderInfoLog(shader, 512, nullptr, error);
     THROW_FATAL("Compiling shader {} (type: {}) failed!\n{}",
-                std::string(source.shader), ENUM_TO_STR(type), error);
+                std::string(source.shader), (unsigned char)type, error);
   }
   return shader;
 }

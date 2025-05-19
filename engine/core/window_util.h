@@ -1,3 +1,7 @@
+#pragma once
+
+#include <array>
+
 #include "util/report/macros.h"
 #include "util/time/downsampler.h"
 #include "util/time/time.h"
@@ -23,7 +27,7 @@ struct FpsStat {
   float avg_fps{0.f};
   int frame_count{0};
   float frame_delta_sum{0.f};
-  std::array<float, kFrameDelta> frame_deltas;
+  std::array<float, kFrameDelta> frame_deltas{};
 };
 
 // Track FPS over the last kFrameDelta frames.

@@ -3,9 +3,6 @@
 #define GLAD_GL_IMPLEMENTATION
 #include "third_party/glad/glad.h"
 
-#define _ENUM_TO_STR(x) #x
-#define ENUM_TO_STR(x) _ENUM_TO_STR(x)
-
 namespace gib {
 
 enum class ShaderType : GLenum {
