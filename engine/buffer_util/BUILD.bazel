@@ -6,3 +6,21 @@ cc_library(
   ],
   visibility = ["//visibility:public"],
 )
+
+cc_library(
+  name = "lock_free_double_buffer",
+  hdrs = ["lock_free_double_buffer.h"],
+  deps = [
+    "//util/report:macros",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "lock_free_triple_buffer",
+  hdrs = ["lock_free_triple_buffer.h"],
+  deps = [
+    "//util/report:macros",
+  ],
+  visibility = ["//visibility:public"],
+)
