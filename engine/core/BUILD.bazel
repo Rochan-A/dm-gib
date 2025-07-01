@@ -32,6 +32,7 @@ cc_library(
     "@glfw",
     "//util:macros",
     ":types",
+    "//third_party/imgui:imgui",
   ],
   visibility = ["//visibility:public"],
 )

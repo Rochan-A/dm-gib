@@ -16,7 +16,8 @@ static const char *glsl_version = "#version 410";
 // Imgui Window Manager.
 class ImGuiWindow {
 public:
-  ImGuiWindow(GLFWwindow *glfw_window_ptr, const bool multi_viewport = false);
+  ImGuiWindow(GLFWwindow *glfw_window_ptr, const bool install_callbacks = false,
+              const bool multi_viewport = false);
   ~ImGuiWindow();
 
   DISALLOW_COPY_AND_ASSIGN(ImGuiWindow);

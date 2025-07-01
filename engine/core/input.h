@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "engine/core/types.h"
+#include "third_party/imgui/backends/imgui_impl_glfw.h"
 
 // Number of keys.
 static constexpr int kNumKeys = GLFW_KEY_LAST + 1;
@@ -92,9 +93,13 @@ public:
     }
     auto callback = [](GLFWwindow *window, int key, int scancode, int action,
                        int mods) {
-      auto self =
-          reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
-      self->KeyCallback(key, scancode, action, mods);
+      ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+      ImGuiIO &io = ImGui::GetIO();
+      if (!io.WantCaptureKeyboard) {
+        auto self =
+            reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
+        self->KeyCallback(key, scancode, action, mods);
+      }
     };
     glfwSetKeyCallback(glfw_window_ptr_, callback);
     key_input_enabled_ = true;
@@ -115,9 +120,13 @@ public:
       return;
     }
     auto callback = [](GLFWwindow *window, double xoffset, double yoffset) {
-      auto self =
-          reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
-      self->ScrollCallback(xoffset, yoffset);
+      ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+      ImGuiIO &io = ImGui::GetIO();
+      if (!io.WantCaptureMouse) {
+        auto self =
+            reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
+        self->ScrollCallback(xoffset, yoffset);
+      }
     };
     glfwSetScrollCallback(glfw_window_ptr_, callback);
     scroll_input_enabled_ = true;
@@ -138,9 +147,13 @@ public:
       return;
     }
     auto callback = [](GLFWwindow *window, double xpos, double ypos) {
-      auto self =
-          reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
-      self->MouseMoveCallback(xpos, ypos);
+      ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+      ImGuiIO &io = ImGui::GetIO();
+      if (!io.WantCaptureMouse) {
+        auto self =
+            reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
+        self->MouseMoveCallback(xpos, ypos);
+      }
     };
     glfwSetCursorPosCallback(glfw_window_ptr_, callback);
     mouse_move_input_enabled_ = true;
@@ -161,9 +174,13 @@ public:
       return;
     }
     auto callback = [](GLFWwindow *window, int button, int action, int mods) {
-      auto self =
-          reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
-      self->MouseButtonCallback(button, action, mods);
+      ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+      ImGuiIO &io = ImGui::GetIO();
+      if (!io.WantCaptureMouse) {
+        auto self =
+            reinterpret_cast<InputManager *>(glfwGetWindowUserPointer(window));
+        self->MouseButtonCallback(button, action, mods);
+      }
     };
     glfwSetMouseButtonCallback(glfw_window_ptr_, callback);
     mouse_button_input_enabled_ = true;

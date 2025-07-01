@@ -93,16 +93,58 @@ private:
     if (ImGui::Begin("Debug")) {
       if (ImGui::CollapsingHeader("Performance",
                                   ImGuiTreeNodeFlags_DefaultOpen)) {
-        char overlay[32];
-        std::snprintf(overlay, sizeof(overlay), "Avg FPS %.02f",
-                      window_.fps_tracker.GetAvgFps());
-        ImGui::Checkbox("Enable VSync", &window_ctx.enable_vsync);
+        // Average FPS text
+        ImGui::Text("Avg FPS: %.2f", window_.fps_tracker.GetAvgFps());
+        // Current frame delta (safe lookup – fall back to 0)
+        float frame_dt_s = 0.0f;
+        const auto &stat = window_.fps_tracker.fps_stat;
+        if (!stat.frame_deltas.empty()) {
+          size_t idx = stat.frame_count % stat.frame_deltas.size();
+          frame_dt_s = stat.frame_deltas[idx];
+        }
+
         ImGui::SameLine();
-        ImGui::Text(
-            "Frame Δt: %.3f ms",
-            1e3f * window_.fps_tracker.fps_stat
-                       .frame_deltas[window_.fps_tracker.fps_stat.frame_count]);
+        ImGui::Text("Frame dt: %.3f ms", 1e3f * frame_dt_s);
+
+        ImGui::Checkbox("Enable VSync", &window_ctx.enable_vsync);
       }
+
+      if (ImGui::CollapsingHeader("Render State",
+                                  ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Checkbox("Fullscreen", &window_ctx.fullscreen);
+        ImGui::Checkbox("Resize Updates", &window_ctx.enable_resize_updates);
+        ImGui::Checkbox("Wireframe", &window_ctx.enable_wireframe);
+        ImGui::Checkbox("Depth Test", &window_ctx.enable_depth_test);
+
+        if (ImGui::Checkbox("Stencil Test", &window_ctx.enable_stencil_test)) {
+          // checkbox toggled; could apply GL state immediately if desired
+        }
+        if (window_ctx.enable_stencil_test) {
+          int func = static_cast<int>(window_ctx.stencil_test_func);
+          if (ImGui::Combo("Func", &func, kStencilFuncNames,
+                           IM_ARRAYSIZE(kStencilFuncNames))) {
+            window_ctx.stencil_test_func = static_cast<StencilTestFunc>(func);
+          }
+          ImGui::Checkbox("Write Stencil", &window_ctx.enable_stencil_updates);
+        }
+
+        ImGui::Checkbox("Alpha Blending", &window_ctx.enable_alpha_blending);
+
+        if (ImGui::Checkbox("Face Cull", &window_ctx.enable_face_cull)) {
+          // toggle handled
+        }
+        if (window_ctx.enable_face_cull) {
+          int mode = static_cast<int>(window_ctx.face_cull_setting);
+          if (ImGui::Combo("Cull Mode", &mode, kCullModeNames,
+                           IM_ARRAYSIZE(kCullModeNames))) {
+            window_ctx.face_cull_setting = static_cast<FaceCullSetting>(mode);
+          }
+        }
+
+        ImGui::Checkbox("Seamless Cubemap",
+                        &window_ctx.enable_seamless_cubemap);
+      }
+
       ImGui::Separator();
       static_cast<Derived *>(this)->DebugUI(window_);
       ImGui::End();

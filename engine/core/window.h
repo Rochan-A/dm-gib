@@ -14,6 +14,10 @@
 
 namespace gib {
 
+static constexpr const char *kStencilFuncNames[] = {"ALWAYS", "EQUAL",
+                                                    "NOTEQUAL"};
+static constexpr const char *kCullModeNames[] = {"BACK", "FRONT"};
+
 enum StencilTestFunc {
   Always = GL_ALWAYS,
   Matching = GL_EQUAL,

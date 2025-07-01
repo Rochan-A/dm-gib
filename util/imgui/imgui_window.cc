@@ -2,7 +2,9 @@
 
 namespace imgui_util {
 
-ImGuiWindow::ImGuiWindow(GLFWwindow *glfw_window_ptr, const bool multi_viewport)
+ImGuiWindow::ImGuiWindow(GLFWwindow *glfw_window_ptr,
+                         const bool install_callbacks,
+                         const bool multi_viewport)
     : glfw_window_ptr_(glfw_window_ptr) {
 
   // Dear ImGui Setup
@@ -20,7 +22,7 @@ ImGuiWindow::ImGuiWindow(GLFWwindow *glfw_window_ptr, const bool multi_viewport)
   style.WindowRounding = 0.0f;
   style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 
-  ImGui_ImplGlfw_InitForOpenGL(glfw_window_ptr_, true);
+  ImGui_ImplGlfw_InitForOpenGL(glfw_window_ptr_, install_callbacks);
   ImGui_ImplOpenGL3_Init(glsl_version);
   INFO("Done Imgui Setup.");
 }
