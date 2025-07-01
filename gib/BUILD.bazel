@@ -1,16 +1,20 @@
 cc_library(
-  name = "game",
-  srcs = ["game.cc"],
-  hdrs = ["game.h"],
+  name = "window",
+  hdrs = ["window.h"],
   deps = [
     "//third_party/glad:glad",
     "//engine/core:core",
     "//engine/core:window",
+    "//engine/core:input",
+    "//util/imgui:imgui_util",
     "//util/imgui:imgui_window",
     "//util/report:error",
+    "//util:macros",
     "@glfw",
     "@glm",
     "//third_party/imgui:imgui",
+    "//engine/shaders:shader",
+    "//engine/vertex_util:vertex_array",
   ],
   visibility = ["//visibility:public"],
 )

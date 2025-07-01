@@ -1,9 +1,11 @@
 cc_binary(
-    name = "gib",
-    srcs = ["gib.cc"],
+    name = "triangle",
+    srcs = ["triangle.cc"],
     deps = [
         "//third_party/concise_args:concise_args",
-        "//gib:game",
+        "//engine/shaders:shader",
+        "//engine/vertex_util:vertex_array",
+        "//gib:window",
     ],
     visibility = ["//visibility:public"],
 )
