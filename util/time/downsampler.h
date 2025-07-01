@@ -26,7 +26,7 @@ public:
   void Reset() { Reset(GetProcessingDt(), skip_first_call_); }
   void SetDt(const float dt_s) { processing_dt_ = seconds_to_usec(dt_s); }
 
-  void Update(const TimePoint &current_tp,
+  void Update(const TimePoint current_tp,
               const bool allow_initialization = false) {
     if (!initialized_) {
       if (allow_initialization) {
@@ -41,7 +41,7 @@ public:
   }
 
   // Fast-path: update & decide.  Returns true if we should “process”.
-  bool UpdateAndCheckIfProcess(const TimePoint &current_tp) {
+  bool UpdateAndCheckIfProcess(const TimePoint current_tp) {
     if (processing_dt_.count() < 0) {
       return false;
     }

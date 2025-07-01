@@ -20,7 +20,8 @@ static const auto kProgramStart = time_util::now();
 
 // Returns the elapsed time (in seconds) since the program started.
 inline const float MonotonicTimeSeconds() {
-  return time_util::to_seconds(time_util::elapsed_usec(kProgramStart).count());
+  return time_util::to_seconds<time_util::DurationUsec>(
+      time_util::elapsed_usec(kProgramStart));
 }
 
 // Returns a stack trace.

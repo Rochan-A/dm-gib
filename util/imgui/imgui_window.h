@@ -8,7 +8,7 @@
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
 #include "third_party/imgui/backends/imgui_impl_opengl3.h"
 #include "third_party/imgui/imgui.h"
-
+#include "util/macros.h"
 namespace imgui_util {
 
 static const char *glsl_version = "#version 410";
@@ -17,14 +17,9 @@ static const char *glsl_version = "#version 410";
 class ImGuiWindow {
 public:
   ImGuiWindow(GLFWwindow *glfw_window_ptr, const bool multi_viewport = false);
-
-  ImGuiWindow(ImGuiWindow &) = delete;
-  ImGuiWindow(ImGuiWindow &&) = delete;
-
-  ImGuiWindow &operator=(ImGuiWindow &&) = delete;
-  ImGuiWindow &operator=(ImGuiWindow &) = delete;
-
   ~ImGuiWindow();
+
+  DISALLOW_COPY_AND_ASSIGN(ImGuiWindow);
 
 private:
   GLFWwindow *glfw_window_ptr_{nullptr};
