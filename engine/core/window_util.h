@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include "util/macros.h"
 #include "util/report/macros.h"
 #include "util/time/downsampler.h"
 #include "util/time/time.h"
@@ -10,43 +11,41 @@
 
 static constexpr int kDefaultWidth = 800;
 static constexpr int kDefaultHeight = 600;
-static constexpr int kFrameDelta = 120;
+static constexpr size_t kFrameDelta = 60;
 
 namespace gib {
 
+// Struct updated on each window tick with current time and delta time since
+// last frame.
 struct WindowTick {
   WindowTick(time_util::TimePoint current_time,
              time_util::DurationUsec delta_time)
       : current_time(current_time), delta_time(delta_time) {}
 
+  // Current time.
   time_util::TimePoint current_time;
+  // Time in usec since last frame.
   time_util::DurationUsec delta_time;
-};
-
-struct FpsStat {
-  float avg_fps{0.f};
-  int frame_count{0};
-  float frame_delta_sum{0.f};
-  std::array<float, kFrameDelta> frame_deltas{};
 };
 
 // Track FPS over the last kFrameDelta frames.
 class FpsTracker {
 public:
-  time_util::DownSampler downsampler_;
-  time_util::TimePoint last_time_{time_util::now()};
+  struct FpsStat {
+    float avg_fps{0.f};
+    size_t frame_count{0};
+    float frame_delta_sum{0.f};
+    std::array<float, kFrameDelta> frame_deltas{0.f};
+  };
+
   FpsStat fps_stat;
 
-  FpsTracker(float report_dt) {
+  FpsTracker(const float report_dt) {
     downsampler_.SetDt(report_dt);
     fps_stat.frame_deltas.fill(0.f);
   }
 
-  FpsTracker(FpsTracker &&other) = delete;
-  FpsTracker &operator=(FpsTracker &&other) = delete;
-
-  FpsTracker(const FpsTracker &) = delete;
-  const FpsTracker &operator=(const FpsTracker &) = delete;
+  ~FpsTracker() = default;
 
   // Average FPS over the sliding window.
   const float GetAvgFps() const {
@@ -63,20 +62,22 @@ public:
         time_util::elapsed_usec(last_time_, window_tick.current_time));
     last_time_ = window_tick.current_time;
 
-    const int offset = fps_stat.frame_count % kFrameDelta;
-    fps_stat.frame_delta_sum += delta_time - fps_stat.frame_deltas[offset];
-
-    fps_stat.frame_count += 1;
+    const size_t offset = fps_stat.frame_count % kFrameDelta;
+    fps_stat.frame_delta_sum += (delta_time - fps_stat.frame_deltas[offset]);
+    fps_stat.frame_count++;
 
     if (downsampler_.UpdateAndCheckIfProcess(window_tick.current_time) ||
         fps_stat.frame_delta_sum < 0) {
-      INFO("Avg FPS: {} ({}, {}, {}, {}, {}, {}, {})", GetAvgFps(),
-           fps_stat.frame_count, fps_stat.frame_delta_sum,
-           fps_stat.frame_deltas[offset], offset, delta_time, kFrameDelta,
-           (void *)&fps_stat.frame_deltas);
+      INFO("Avg FPS: {}", GetAvgFps());
     }
     fps_stat.frame_deltas[offset] = delta_time;
   }
+
+  DISALLOW_COPY_AND_ASSIGN(FpsTracker);
+
+private:
+  time_util::DownSampler downsampler_;
+  time_util::TimePoint last_time_{time_util::now()};
 };
 
 } // namespace gib

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/macros.h"
 #define GLAD_GL_IMPLEMENTATION
 #include "third_party/glad/glad.h"
 #define GLFW_INCLUDE_NONE
@@ -13,6 +14,34 @@
 
 namespace gib {
 
+enum StencilTestFunc {
+  Always = GL_ALWAYS,
+  Matching = GL_EQUAL,
+  NotMatching = GL_NOTEQUAL,
+};
+
+enum FaceCullSetting {
+  Front = GL_FRONT,
+  Back = GL_BACK,
+};
+
+// State context of the Glfw window.
+struct WindowContext {
+  bool enable_vsync{false};
+  // Windowed if false.
+  bool fullscreen{false};
+  bool enable_resize_updates{true};
+  bool enable_wireframe{false};
+  bool enable_depth_test{false};
+  bool enable_stencil_test{false};
+  StencilTestFunc stencil_test_func;
+  bool enable_stencil_updates{false};
+  bool enable_alpha_blending{false};
+  bool enable_face_cull{false};
+  FaceCullSetting face_cull_setting;
+  bool enable_seamless_cubemap{false};
+};
+
 // Handles Glfw window and its properties.
 class Window {
 public:
@@ -23,12 +52,6 @@ public:
 
   ~Window() = default;
 
-  Window(Window &&other) = delete;
-  Window &operator=(Window &&other) = delete;
-
-  Window(const Window &) = delete;
-  const Window &operator=(const Window &) = delete;
-
   // Set GLFW input mode.
   void SetGLFWInputMode(const int mode = GLFW_CURSOR,
                         const int value = GLFW_CURSOR_DISABLED);
@@ -38,76 +61,42 @@ public:
 
   const float GetAvgFps() const;
 
-  void Tick(const WindowTick &window_tick);
+  void Tick(const WindowTick &window_tick, const WindowContext &ctx);
 
   const WindowSize GetWindowSize();
-  void SetWindowSize(int width, int height);
+  void SetWindowSize(const int width, const int height);
 
-  void SetViewportSize(int width, int height);
-
-  void MakeFullscreen();
-  void MakeWindowed();
-
+  void SetViewportSize(const int width, const int height);
   const float GetAspectRatio();
 
-  void EnableResizeUpdates();
-  void DisableResizeUpdates();
+  void ToggleFullscreen(const bool &fullscreen);
+  void ToggleResizeUpdates(const bool &enable_resize_updates);
+  void ToggleVsync(const bool &enable_vsync);
+  void ToggleWireframe(const bool &enable_wireframe);
+  void ToggleDepthTest(const bool &enable_depth_test);
+  void ToggleStencilTest(const bool &enable_stencil_test,
+                         const StencilTestFunc &func);
+  void ToggleStencilUpdates(const bool &enable_stencil_updates);
+  void ToggleAlphaBlending(const bool &enable_alpha_blending);
+  void ToggleFaceCull(const bool &enable_face_cull,
+                      const FaceCullSetting &face_cull_setting);
+  void ToggleSeamlessCubemap(const bool &enable_seamless_cubemap);
 
-  void EnableVsync() { glfwSwapInterval(1); }
-  void DisableVsync() { glfwSwapInterval(0); }
-
-  void EnableWireframe() { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
-  void DisableWireframe() { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
-
-  void EnableDepthTest() { glEnable(GL_DEPTH_TEST); }
-  void DisableDepthTest() { glDisable(GL_DEPTH_TEST); }
-
-  void EnableStencilTest() {
-    glEnable(GL_STENCIL_TEST);
-    // Only replace the value in the stencil buffer if both the stencil and
-    // depth test pass.
-    glStencilOp(/*sfail=*/GL_KEEP, /*dpfail=*/GL_KEEP, /*dppass=*/GL_REPLACE);
-  }
-  void DisableStencilTest() { glDisable(GL_STENCIL_TEST); }
-
-  void EnableStencilUpdates() { glStencilMask(0xFF); }
-  void DisableStencilUpdates() { glStencilMask(0x00); }
-
-  void StencilAlwaysDraw() { SetStencilFunc(GL_ALWAYS); }
-  void StencilDrawWhenMatching() { SetStencilFunc(GL_EQUAL); }
-  void StencilDrawWhenNotMatching() { SetStencilFunc(GL_NOTEQUAL); }
-  void SetStencilFunc(GLenum func) {
-    // Set the stencil test to use the given `func` when comparing for fragment
-    // liveness.
-    glStencilFunc(func, /*ref=*/1, /*mask=*/0xFF);
-  }
-
-  void EnableAlphaBlending() {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendEquation(GL_FUNC_ADD);
-  }
-  void DisableAlphaBlending() { glDisable(GL_BLEND); }
-
-  void EnableFaceCull() { glEnable(GL_CULL_FACE); }
-  void DisableFaceCull() { glDisable(GL_CULL_FACE); }
-
-  void EnableSeamlessCubemap() { glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); }
-  void DisableSeamlessCubemap() { glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS); }
-
-  void CullFrontFaces() { glCullFace(GL_FRONT); }
-  void CullBackFaces() { glCullFace(GL_BACK); }
+  WindowContext GetWindowContext() { return ctx_; }
 
   FpsTracker fps_tracker;
 
+  DISALLOW_COPY_AND_ASSIGN(Window);
+
 private:
-  void FramebufferSizeCallback(GLFWwindow *window, int width, int height);
+  void FramebufferSizeCallback(GLFWwindow *window, const int width,
+                               const int height);
 
   bool fullscreen_{false};
-  std::string title_;
+  const std::string title_;
   bool context_initialized_{false};
 
-  bool resize_updates_enabled_{false};
+  WindowContext ctx_;
 
   GLFWwindow *glfw_window_ptr_{nullptr};
   GLFWmonitor *monitor_{nullptr};

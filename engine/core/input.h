@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/macros.h"
 #include "util/report/macros.h"
 #include <array>
 
@@ -73,11 +74,7 @@ public:
 
   ~InputManager() {}
 
-  InputManager(InputManager &&other) noexcept;
-  InputManager &operator=(InputManager &&other) noexcept;
-
-  InputManager(const InputManager &) = delete;
-  const InputManager &operator=(const InputManager &) = delete;
+  DISALLOW_COPY_AND_ASSIGN(InputManager);
 
   void EnableMouseCapture() {
     glfwSetInputMode(glfw_window_ptr_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

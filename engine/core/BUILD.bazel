@@ -6,6 +6,7 @@ cc_library(
     "//third_party/glad:glad",
     "@glfw",
     "//util/report:macros",
+    "//util:macros",
   ],
   visibility = ["//visibility:public"],
 )
@@ -17,6 +18,7 @@ cc_library(
     "//util/report:macros",
     "//util/time:downsampler",
     "//util/time:time",
+    "//util:macros",
     ":types",
   ],
   visibility = ["//visibility:public"],
@@ -28,6 +30,7 @@ cc_library(
   deps = [
     "//third_party/glad:glad",
     "@glfw",
+    "//util:macros",
     ":types",
   ],
   visibility = ["//visibility:public"],
@@ -43,6 +46,7 @@ cc_library(
     "//engine/core:core",
     "//util/report:macros",
     "//util/time:downsampler",
+    "//util:macros",
     ":window_util",
     ":types",
   ],

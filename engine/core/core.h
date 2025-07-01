@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/macros.h"
 #include "util/report/macros.h"
 
 #define GLAD_GL_IMPLEMENTATION
@@ -12,7 +13,8 @@ namespace gib {
 // Class to initialize and manage core GLFW context.
 class GLCore {
 public:
-  explicit GLCore();
+  GLCore();
+  ~GLCore();
 
   // Enable GLFW error logging if not enabled already.
   bool EnableGlfwErrorLogging();
@@ -26,14 +28,13 @@ public:
 
   bool IsInit() const { return glfw_init_success_ == GLFW_TRUE; }
 
-  ~GLCore();
+  // GLCore(GLCore &&other) noexcept;
+  // GLCore &operator=(GLCore &&other) noexcept;
 
-  GLCore(GLCore &&other) noexcept;
+  // GLCore(const GLCore &) = delete;
+  // const GLCore &operator=(const GLCore &) = delete;
 
-  GLCore &operator=(GLCore &&other) noexcept;
-
-  GLCore(const GLCore &) = delete;
-  const GLCore &operator=(const GLCore &) = delete;
+  DISALLOW_COPY_AND_ASSIGN(GLCore);
 
 private:
   // Whether or not to log glfw errors.

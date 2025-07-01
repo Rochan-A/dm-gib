@@ -70,27 +70,27 @@ void GLCore::DisableGlErrorLogging() {
   INFO("Disabled OpenGL debug callback.");
 }
 
-GLCore::GLCore(GLCore &&other) noexcept
-    : glfw_error_logging_enabled_(other.glfw_error_logging_enabled_),
-      gl_debug_logging_enabled_(other.gl_debug_logging_enabled_),
-      glfw_init_success_(other.glfw_init_success_) {
+// GLCore::GLCore(GLCore &&other) noexcept
+//     : glfw_error_logging_enabled_(other.glfw_error_logging_enabled_),
+//       gl_debug_logging_enabled_(other.gl_debug_logging_enabled_),
+//       glfw_init_success_(other.glfw_init_success_) {
 
-  other.glfw_error_logging_enabled_ = false;
-  other.gl_debug_logging_enabled_ = false;
-  other.glfw_init_success_ = GLFW_FALSE;
-}
+//   other.glfw_error_logging_enabled_ = false;
+//   other.gl_debug_logging_enabled_ = false;
+//   other.glfw_init_success_ = GLFW_FALSE;
+// }
 
-GLCore &GLCore::operator=(GLCore &&other) noexcept {
-  if (this != &other) {
-    glfw_error_logging_enabled_ = other.glfw_error_logging_enabled_;
-    gl_debug_logging_enabled_ = other.gl_debug_logging_enabled_;
-    glfw_init_success_ = other.glfw_init_success_;
+// GLCore &GLCore::operator=(GLCore &&other) noexcept {
+//   if (this != &other) {
+//     glfw_error_logging_enabled_ = other.glfw_error_logging_enabled_;
+//     gl_debug_logging_enabled_ = other.gl_debug_logging_enabled_;
+//     glfw_init_success_ = other.glfw_init_success_;
 
-    other.glfw_error_logging_enabled_ = false;
-    other.gl_debug_logging_enabled_ = false;
-    other.glfw_init_success_ = GLFW_FALSE;
-  }
-  return *this;
-}
+//     other.glfw_error_logging_enabled_ = false;
+//     other.gl_debug_logging_enabled_ = false;
+//     other.glfw_init_success_ = GLFW_FALSE;
+//   }
+//   return *this;
+// }
 
 } // namespace gib
