@@ -11,15 +11,14 @@
 
 static constexpr int kDefaultWidth = 800;
 static constexpr int kDefaultHeight = 600;
-static constexpr size_t kFrameDelta = 60;
+static constexpr size_t kFrameDelta = 120;
 
 namespace gib {
 
 // Struct updated on each window tick with current time and delta time since
 // last frame.
-struct WindowTick {
-  WindowTick(time_util::TimePoint current_time,
-             time_util::DurationUsec delta_time)
+struct Tick {
+  Tick(time_util::TimePoint current_time, time_util::DurationUsec delta_time)
       : current_time(current_time), delta_time(delta_time) {}
 
   // Current time.
@@ -27,6 +26,7 @@ struct WindowTick {
   // Time in usec since last frame.
   time_util::DurationUsec delta_time;
 };
+typedef struct Tick Tick;
 
 // Track FPS over the last kFrameDelta frames.
 class FpsTracker {
@@ -57,7 +57,7 @@ public:
   }
 
   // Call once per rendered frame.
-  void Tick(const WindowTick &window_tick) {
+  void Tick(const Tick &window_tick) {
     const auto delta_time = time_util::to_seconds<time_util::DurationUsec>(
         time_util::elapsed_usec(last_time_, window_tick.current_time));
     last_time_ = window_tick.current_time;
@@ -68,7 +68,7 @@ public:
 
     if (downsampler_.UpdateAndCheckIfProcess(window_tick.current_time) ||
         fps_stat.frame_delta_sum < 0) {
-      INFO("Avg FPS: {}", GetAvgFps());
+      DEBUG("Avg FPS: {}", GetAvgFps());
     }
     fps_stat.frame_deltas[offset] = delta_time;
   }

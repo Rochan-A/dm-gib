@@ -2,12 +2,12 @@
 
 namespace gib {
 
-// Callback that prints GLFW errors to stderr.
+// Callback that prints warning for GLFW errors.
 inline void GlfwErrorPrintCallback(int error, const char *description) {
   WARNING("GLFW ERROR: {} [error code {}]\n", description, error);
 }
 
-// Callback that prints OpenGL errors to stderr.
+// Callback that prints warning for OpenGL errors.
 inline void GLAPIENTRY GlDebugPrintCallback(GLenum source, GLenum type,
                                             GLuint id, GLenum severity,
                                             GLsizei length,
@@ -22,75 +22,46 @@ inline void GLAPIENTRY GlDebugPrintCallback(GLenum source, GLenum type,
 GLCore::GLCore() {
   glfw_init_success_ = glfwInit();
   ASSERT(glfw_init_success_ == GLFW_TRUE, "Failed to initialize GLFW!");
-  INFO("Successfully initialized GLFW");
-  EnableGlfwErrorLogging();
+  DEBUG("Successfully initialized GLFW");
+  ToggleGlfwErrorLogging(true);
 }
 
 GLCore::~GLCore() {
-  if (glfw_init_success_ == GLFW_TRUE) {
-    glfwTerminate();
-  } else {
+  if (glfw_init_success_ != GLFW_TRUE) {
     WARNING("GLFW failed to initialize, not calling glfwTerminate()");
+    return;
   }
+  glfwTerminate();
 }
 
-bool GLCore::EnableGlfwErrorLogging() {
-  if (glfw_error_logging_enabled_) {
-    return false;
+void GLCore::ToggleGlfwErrorLogging(const bool enable) {
+  if (glfw_error_logging_enabled_ == enable) {
+    return;
   }
-  glfwSetErrorCallback(&GlfwErrorPrintCallback);
-  glfw_error_logging_enabled_ = true;
-  INFO("Enabled GLFW error callback.");
-  return true;
+  if (enable) {
+    glfwSetErrorCallback(&GlfwErrorPrintCallback);
+  } else {
+    glfwSetErrorCallback(nullptr);
+  }
+  glfw_error_logging_enabled_ = enable;
+  INFO("GLFW error callback logging enabled: {}", enable);
 }
 
-void GLCore::DisableGlfwErrorLogging() {
-  glfwSetErrorCallback(nullptr);
-  glfw_error_logging_enabled_ = false;
-  INFO("Disabled OpenGL debug callback.");
-}
-
-bool GLCore::EnableGlErrorLogging() {
+void GLCore::ToggleOpenGlErrorLogging(const bool enable) {
   if (!GLAD_GL_KHR_debug) {
-    return false;
+    return;
   }
-  if (gl_debug_logging_enabled_) {
-    return false;
+  if (gl_debug_logging_enabled_ == enable) {
+    return;
   }
-  glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback(&GlDebugPrintCallback, nullptr);
-  gl_debug_logging_enabled_ = true;
-  INFO("Enabled OpenGL debug callback.");
-  return true;
+  if (enable) {
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(&GlDebugPrintCallback, nullptr);
+  } else {
+    glDisable(GL_DEBUG_OUTPUT);
+  }
+  gl_debug_logging_enabled_ = enable;
+  INFO("OpenGL debug callback logging enabled: {}", enable);
 }
-
-void GLCore::DisableGlErrorLogging() {
-  gl_debug_logging_enabled_ = false;
-  glDisable(GL_DEBUG_OUTPUT);
-  INFO("Disabled OpenGL debug callback.");
-}
-
-// GLCore::GLCore(GLCore &&other) noexcept
-//     : glfw_error_logging_enabled_(other.glfw_error_logging_enabled_),
-//       gl_debug_logging_enabled_(other.gl_debug_logging_enabled_),
-//       glfw_init_success_(other.glfw_init_success_) {
-
-//   other.glfw_error_logging_enabled_ = false;
-//   other.gl_debug_logging_enabled_ = false;
-//   other.glfw_init_success_ = GLFW_FALSE;
-// }
-
-// GLCore &GLCore::operator=(GLCore &&other) noexcept {
-//   if (this != &other) {
-//     glfw_error_logging_enabled_ = other.glfw_error_logging_enabled_;
-//     gl_debug_logging_enabled_ = other.gl_debug_logging_enabled_;
-//     glfw_init_success_ = other.glfw_init_success_;
-
-//     other.glfw_error_logging_enabled_ = false;
-//     other.gl_debug_logging_enabled_ = false;
-//     other.glfw_init_success_ = GLFW_FALSE;
-//   }
-//   return *this;
-// }
 
 } // namespace gib

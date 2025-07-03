@@ -10,7 +10,9 @@
 #include "engine/core/window_util.h"
 #include "util/report/macros.h"
 
+#include "engine/core/input.h"
 #include "engine/core/types.h"
+#include "third_party/imgui/backends/imgui_impl_glfw.h"
 
 namespace gib {
 
@@ -29,8 +31,8 @@ enum FaceCullSetting {
   Back = GL_BACK,
 };
 
-// State context of the Glfw window.
-struct WindowContext {
+// Context for the Glfw window.
+struct GlfwWindowContext {
   bool enable_vsync{false};
   // Windowed if false.
   bool fullscreen{false};
@@ -46,28 +48,24 @@ struct WindowContext {
   bool enable_seamless_cubemap{false};
 };
 
-// Handles Glfw window and its properties.
-class Window {
+// Handles Glfw window, its properties, and inputs.
+class GlfwWindow {
 public:
-  explicit Window(std::shared_ptr<GLCore> &core, const std::string title,
-                  const int width = kDefaultWidth,
-                  const int height = kDefaultHeight, const int samples = 0,
-                  const float fps_report_dt = 5.0);
+  explicit GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
+                      const int width = kDefaultWidth,
+                      const int height = kDefaultHeight, const int samples = 0,
+                      const float fps_report_dt = 5.0);
 
-  ~Window() = default;
-
-  // Set GLFW input mode.
-  void SetGLFWInputMode(const int mode = GLFW_CURSOR,
-                        const int value = GLFW_CURSOR_DISABLED);
+  ~GlfwWindow() = default;
 
   // Returns pointer to GLFW window.
-  GLFWwindow *GetWindow();
+  GLFWwindow *GetGlfwWindowPtr();
 
   const float GetAvgFps() const;
 
-  void Tick(const WindowTick &window_tick, const WindowContext &ctx);
+  void Tick(const Tick &window_tick, const GlfwWindowContext &ctx);
 
-  const WindowSize GetWindowSize();
+  WindowSize GetWindowSize();
   void SetWindowSize(const int width, const int height);
 
   void SetViewportSize(const int width, const int height);
@@ -86,21 +84,20 @@ public:
                       const FaceCullSetting &face_cull_setting);
   void ToggleSeamlessCubemap(const bool &enable_seamless_cubemap);
 
-  WindowContext GetWindowContext() { return ctx_; }
+  GlfwWindowContext GetGlfwWindowContext() { return ctx_; }
 
   FpsTracker fps_tracker;
 
-  DISALLOW_COPY_AND_ASSIGN(Window);
+  DISALLOW_COPY_AND_ASSIGN(GlfwWindow);
 
 private:
   void FramebufferSizeCallback(GLFWwindow *window, const int width,
                                const int height);
 
-  bool fullscreen_{false};
   const std::string title_;
   bool context_initialized_{false};
 
-  WindowContext ctx_;
+  GlfwWindowContext ctx_;
 
   GLFWwindow *glfw_window_ptr_{nullptr};
   GLFWmonitor *monitor_{nullptr};

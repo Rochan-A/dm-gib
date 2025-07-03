@@ -3,6 +3,7 @@ cc_library(
   hdrs = ["camera.h"],
   deps = [
     "//third_party/glad:glad",
+    "//util/report:macros",
   ],
   visibility = ["//visibility:public"],
 )

@@ -16,31 +16,21 @@ public:
   GLCore();
   ~GLCore();
 
-  // Enable GLFW error logging if not enabled already.
-  bool EnableGlfwErrorLogging();
+  // Enable/Disable GLFW error logging.
+  void ToggleGlfwErrorLogging(const bool enable);
 
-  void DisableGlfwErrorLogging();
-
-  // Enable OpenGL error logging if not enabled already.
-  bool EnableGlErrorLogging();
-
-  void DisableGlErrorLogging();
+  // Enable/Disable OpenGL error logging.
+  void ToggleOpenGlErrorLogging(const bool enable);
 
   bool IsInit() const { return glfw_init_success_ == GLFW_TRUE; }
-
-  // GLCore(GLCore &&other) noexcept;
-  // GLCore &operator=(GLCore &&other) noexcept;
-
-  // GLCore(const GLCore &) = delete;
-  // const GLCore &operator=(const GLCore &) = delete;
 
   DISALLOW_COPY_AND_ASSIGN(GLCore);
 
 private:
-  // Whether or not to log glfw errors.
+  // True if glfw error logging is enabled.
   bool glfw_error_logging_enabled_{false};
 
-  // Whether or not to log OpenGL debug messages.
+  // True if logging OpenGL debug messages is enabled.
   bool gl_debug_logging_enabled_{false};
 
   // Whether GLFW is initialized successfully.

@@ -32,7 +32,6 @@ cc_library(
     "@glfw",
     "//util:macros",
     ":types",
-    "//third_party/imgui:imgui",
   ],
   visibility = ["//visibility:public"],
 )
@@ -45,11 +44,13 @@ cc_library(
     "//third_party/glad:glad",
     "@glfw",
     "//engine/core:core",
+    "//engine/core:input",
     "//util/report:macros",
     "//util/time:downsampler",
     "//util:macros",
     ":window_util",
     ":types",
+    "//third_party/imgui:imgui",
   ],
   visibility = ["//visibility:public"],
 )
@@ -57,5 +58,8 @@ cc_library(
 cc_library(
   name = "types",
   hdrs = ["types.h"],
+  deps = [
+    "@glm"
+  ],
   visibility = ["//visibility:public"]
 )

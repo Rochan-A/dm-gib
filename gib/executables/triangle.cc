@@ -53,9 +53,18 @@ static const Vertex vertices[3] = {{{-0.6f, -0.4f}, {1.f, 0.f, 0.f}},
 
 namespace gib {
 
-class Triangle final : public GameWindow<Triangle> {
+class Triangle final : public BaseWindow<Triangle> {
 public:
-  Triangle() : GameWindow("Triangle") {
+  Triangle() : BaseWindow("Triangle") {
+    ToggleMouseButtonInput(true);
+    ToggleKeyInput(true);
+    ToggleScrollInput(true);
+    ToggleMouseMoveInput(true);
+
+    SetGLFWInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    SetMouseButtonBehavior(MouseButtonBehavior::NONE);
+    SetEscKeyBehavior(EscBehavior::NONE);
+
     ShaderSource vertex_shader(vertex_shader_text, ShaderType::VERTEX, false);
     ShaderSource fragment_shader(fragment_shader_text, ShaderType::FRAGMENT,
                                  false);
@@ -78,7 +87,7 @@ public:
     vertex_array_vbo = vertex_array.GetVbo();
   }
 
-  void Tick(const WindowTick &tick, Window &window) {
+  void Tick(const Tick &tick, GlfwWindow &window) {
     const float ratio = window.GetAspectRatio();
 
     glm::mat4x4 m, p, mvp;
@@ -93,9 +102,9 @@ public:
     glDrawArrays(GL_TRIANGLES, 0, 3);
   }
 
-  void Tock(const WindowTick &tick, Window &window) {}
+  void Tock(const struct Tick &tick, GlfwWindow &window) {}
 
-  void DebugUI(Window &window) {}
+  void DebugUI(GlfwWindow &window) {}
 
 private:
   unsigned int program;

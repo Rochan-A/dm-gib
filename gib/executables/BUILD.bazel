@@ -9,3 +9,16 @@ cc_binary(
     ],
     visibility = ["//visibility:public"],
 )
+
+cc_binary(
+    name = "flycam",
+    srcs = ["flycam.cc"],
+    deps = [
+        "//engine/camera:camera",
+        "//third_party/concise_args:concise_args",
+        "//engine/shaders:shader",
+        "//engine/vertex_util:vertex_array",
+        "//gib:window",
+    ],
+    visibility = ["//visibility:public"],
+)
