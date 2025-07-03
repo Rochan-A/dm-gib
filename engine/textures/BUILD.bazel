@@ -1,0 +1,9 @@
+cc_library(
+  name = "texture_manager",
+  srcs = ["texture_manager.h"],
+  deps = [
+    "//third_party/glad:glad",
+    "@glfw",
+  ],
+  visibility = ["//visibility:public"],
+)
