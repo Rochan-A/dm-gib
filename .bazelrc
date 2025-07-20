@@ -1,2 +1,2 @@
 # Default to debug compilation mode.
-build -c dbg
+build -c dbg --strip=never

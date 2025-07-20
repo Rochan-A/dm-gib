@@ -1,5 +1,5 @@
 cc_library(
-    name="concise_args",
-    srcs = ["ConciseArgs.h"],
+    name = "concise_args",
+    hdrs = ["ConciseArgs.h"],
     visibility = ["//visibility:public"],
 )

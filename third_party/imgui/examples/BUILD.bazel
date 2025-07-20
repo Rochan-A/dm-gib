@@ -3,7 +3,7 @@ cc_binary(
     srcs = ["imgui_glfw_opengl.cc"],
     visibility = ["//visibility:public"],
     deps = [
-        "//third_party/imgui",
+        "//third_party/imgui:imgui",
         "@glfw",
     ],
 )

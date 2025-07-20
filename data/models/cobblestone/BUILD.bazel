@@ -1,0 +1,6 @@
+exports_files(
+  [
+    "model.obj"
+  ],
+  visibility = ["//visibility:public"],
+)
