@@ -1,9 +1,21 @@
 cc_library(
-  name = "camera",
-  hdrs = ["camera.h"],
+  name = "camera_base",
+  hdrs = ["camera_base.h"],
   deps = [
     "//third_party/glad:glad",
-    "//util/report:macros",
+    "//third_party/imgui:imgui",
+    "//third_party/glm:glm",
+    "//engine/core:types",
+
+  ],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "fly_camera",
+  hdrs = ["fly_camera.h"],
+  deps = [
+    ":camera_base"
   ],
   visibility = ["//visibility:public"],
 )
