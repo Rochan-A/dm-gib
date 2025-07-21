@@ -14,42 +14,60 @@
 #include "engine/camera/fly_camera.h"
 #include "engine/core/input.h"
 #include "util/time/time.h"
+#include <OpenGL/OpenGL.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "third_party/stb_image/stb_image.h"
 
 struct FloorVertex {
-  glm::vec3 pos;
-  glm::vec3 col;
+  glm::vec3 positions;
+  glm::vec3 color;
+  glm::vec2 texture_coords;
 };
 
 // Two triangles forming a 10×10 plane on the XZ axis
 static const FloorVertex floor_vertices[] = {
-    {{-5.f, 0.f, -5.f}, {0.3f, 0.3f, 0.3f}},
-    {{5.f, 0.f, -5.f}, {0.3f, 0.3f, 0.3f}},
-    {{5.f, 0.f, 5.f}, {0.3f, 0.3f, 0.3f}},
+    {{-5.f, 0.f, -5.f}, {0.3f, 0.3f, 0.3f}, {0.0f, 0.0f}},
+    {{5.f, 0.f, -5.f}, {0.3f, 0.3f, 0.3f}, {1.0f, 0.0f}},
+    {{5.f, 0.f, 5.f}, {0.3f, 0.3f, 0.3f}, {1.0f, 1.0f}},
 
-    {{-5.f, 0.f, -5.f}, {0.3f, 0.3f, 0.3f}},
-    {{5.f, 0.f, 5.f}, {0.3f, 0.3f, 0.3f}},
-    {{-5.f, 0.f, 5.f}, {0.3f, 0.3f, 0.3f}}};
+    {{-5.f, 0.f, -5.f}, {0.3f, 0.3f, 0.3f}, {0.0f, 0.0f}},
+    {{5.f, 0.f, 5.f}, {0.3f, 0.3f, 0.3f}, {1.0f, 1.0f}},
+    {{-5.f, 0.f, 5.f}, {0.3f, 0.3f, 0.3f}, {0.0f, 1.0f}}};
 
 static const char *vertex_shader_src = R"GLSL(
 #version 330 core
-layout(location = 0) in vec3 vPos;
-layout(location = 1) in vec3 vCol;
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
 
 uniform mat4 MVP;
 
-out vec3 color;
+out vec3 ourColor;
+out vec2 TexCoord;
 
-void main() {
-  gl_Position = MVP * vec4(vPos, 1.0);
-  color = vCol;
+void main()
+{
+	gl_Position = MVP * vec4(aPos, 1.0);
+	ourColor = aColor;
+	TexCoord = vec2(aTexCoord.x, aTexCoord.y);
 }
 )GLSL";
 
 static const char *fragment_shader_src = R"GLSL(
 #version 330 core
-in vec3 color;
-out vec4 frag;
-void main() { frag = vec4(color, 1.0); }
+out vec4 FragColor;
+
+in vec3 ourColor;
+in vec2 TexCoord;
+
+// texture sampler
+uniform sampler2D texture1;
+
+void main()
+{
+	FragColor = texture(texture1, TexCoord);
+}
 )GLSL";
 
 namespace gib {
@@ -80,8 +98,40 @@ public:
     vao.AddVertexBuffer(&floor_vertices, sizeof(floor_vertices));
     vao.AddVertexAttribute(3, GL_FLOAT, false); // position
     vao.AddVertexAttribute(3, GL_FLOAT, false); // color
+    vao.AddVertexAttribute(2, GL_FLOAT, false); // texture coords
     vao.Apply();
     floor_vao_ = vao.GetVbo();
+
+    // load and create a texture
+    // -------------------------
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D,
+                  texture); // all upcoming GL_TEXTURE_2D operations now have
+                            // effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                    GL_REPEAT); // set texture wrapping to GL_REPEAT (default
+                                // wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can
+    // find files on any IDE/platform; replace it with your own image path.
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *data =
+        stbi_load("data/textures/dirt.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                   GL_UNSIGNED_BYTE, data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+      std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
   }
 
   void Tick(const FrameTick &frame_tick, GlfwWindow &window) {
@@ -96,6 +146,9 @@ public:
     glm::mat4 model = glm::identity<glm::mat4>();
     glm::mat4 mvp = proj * view * model;
 
+    // bind Texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     glUseProgram(program_);
     glUniformMatrix4fv(mvp_loc_, 1, GL_FALSE, glm::value_ptr(mvp));
 
@@ -108,6 +161,8 @@ public:
   void DebugUI(GlfwWindow &window) { camera_.DebugUI(); }
 
 private:
+  unsigned int texture;
+
   /*================ Input Handling ================*/
   void ProcessInput(float dt) {
     Input input = GetInput();
