@@ -22,6 +22,7 @@ public:
   // Enable/Disable OpenGL error logging.
   void ToggleOpenGlErrorLogging(const bool enable);
 
+  // Returns True if glfw is initialized.
   bool IsInit() const { return glfw_init_success_ == GLFW_TRUE; }
 
   DISALLOW_COPY_AND_ASSIGN(GLCore);

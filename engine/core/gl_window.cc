@@ -1,4 +1,4 @@
-#include "engine/core/window.h"
+#include "engine/core/gl_window.h"
 #include "engine/core/window_util.h"
 
 namespace gib {
@@ -53,9 +53,9 @@ GLFWwindow *GlfwWindow::GetGlfwWindowPtr() {
   return glfw_window_ptr_;
 }
 
-WindowSize GlfwWindow::GetWindowSize() {
-  WindowSize size;
-  glfwGetWindowSize(glfw_window_ptr_, &size.width, &size.height);
+Size2D GlfwWindow::GetWindowSize() {
+  Size2D size{0, 0};
+  glfwGetWindowSize(glfw_window_ptr_, &size.x, &size.y);
   return size;
 }
 
@@ -85,7 +85,7 @@ void GlfwWindow::ToggleFullscreen(const bool &fullscreen) {
     auto size = GetWindowSize();
     glfwSetWindowMonitor(glfw_window_ptr_, /* monitor */ nullptr,
                          /* xpos */ 0,
-                         /* ypos */ 0, size.width, size.height,
+                         /* ypos */ 0, size.Width(), size.Height(),
                          /* refreshRate */ GLFW_DONT_CARE);
   }
   ctx_.fullscreen = fullscreen;
@@ -231,8 +231,8 @@ void GlfwWindow::ToggleSeamlessCubemap(const bool &enable_seamless_cubemap) {
 }
 
 const float GlfwWindow::GetAspectRatio() {
-  WindowSize size = GetWindowSize();
-  return static_cast<float>(size.width) / static_cast<float>(size.height);
+  Size2D size = GetWindowSize();
+  return static_cast<float>(size.Width()) / static_cast<float>(size.Height());
 }
 
 void GlfwWindow::FramebufferSizeCallback(GLFWwindow *window, const int width,
@@ -240,9 +240,14 @@ void GlfwWindow::FramebufferSizeCallback(GLFWwindow *window, const int width,
   SetViewportSize(width, height);
 }
 
-void GlfwWindow::Tick(const struct Tick &window_tick,
+void GlfwWindow::DebugUI() {
+  fps_tracker.DebugUI();
+  ctx_.DebugUI();
+}
+
+void GlfwWindow::Tick(const struct FrameTick &frame_tick,
                       const GlfwWindowContext &ctx) {
-  fps_tracker.Tick(window_tick);
+  fps_tracker.Tick(frame_tick);
   ToggleVsync(ctx.enable_vsync);
   ToggleFullscreen(ctx.fullscreen);
   ToggleResizeUpdates(ctx.enable_resize_updates);

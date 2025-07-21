@@ -16,12 +16,13 @@ static constexpr int kNumMouseButtons = GLFW_MOUSE_BUTTON_LAST + 1;
 
 namespace gib {
 
+// Behavior of Left Mouse Button
 enum class MouseButtonBehavior : unsigned char {
   NONE = 0,
   CAPTURE = 1,
 };
 
-// Controls behavior when Esc key is pressed.
+// Behavior when Esc key is pressed.
 enum class EscBehavior : unsigned char {
   NONE = 0,
   // Uncaptures the mouse if it is captured.
@@ -32,12 +33,14 @@ enum class EscBehavior : unsigned char {
   UNCAPTURE_MOUSE_OR_CLOSE = 3,
 };
 
+// Mouse button states.
 enum class MouseButtonAction : unsigned char {
   UNKNOWN,
   RELEASE,
   PRESS,
 };
 
+// Key states.
 enum class KeyAction : unsigned char { UNKNOWN, RELEASE, PRESS, REPEAT };
 
 struct Input {
@@ -47,12 +50,7 @@ struct Input {
   Offset mouse_pos{};
   Offset scroll_offset{};
 
-  void Reset() {
-    key_state.fill(KeyAction::UNKNOWN);
-    mouse_button_state.fill(MouseButtonAction::UNKNOWN);
-    mouse_pos = {0.f, 0.f};
-    scroll_offset = {0.f, 0.f};
-  }
+  void Reset() { scroll_offset = {0.f, 0.f}; }
 
   void KeyCallback(int key, int scancode, int action, int mods) {
     key_state[key] = KeyAction(action);
@@ -62,11 +60,11 @@ struct Input {
     mouse_button_state[button] = MouseButtonAction(action);
   }
 
-  void ScrollCallback(double xoffset, double yoffset) {
+  void ScrollCallback(const double xoffset, const double yoffset) {
     scroll_offset = {static_cast<float>(xoffset), static_cast<float>(yoffset)};
   }
 
-  void MouseMoveCallback(double xpos, double ypos) {
+  void MouseMoveCallback(const double xpos, const double ypos) {
     mouse_pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
   }
 };

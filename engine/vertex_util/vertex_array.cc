@@ -35,7 +35,8 @@ void VertexArray::AddElementBuffer(const void *data, const size_t &size,
 
 void VertexArray::AddInstanceVertexBuffer(const void *data, const size_t &size,
                                           const GLenum usage) {
-  THROW_FATAL("TODO!");
+  // TODO
+  THROW_FATAL("Instance vertex buffer not implemented.");
   ASSERT(data != nullptr && size > 0, "Expected data != nullptr & size > 0!");
   if (instance_vbo_ > 0) {
     THROW_FATAL("Instance VBO already set!");

@@ -1,30 +1,51 @@
 cc_library(
-  name = "types",
-  hdrs = ["types.h"],
-  visibility = ["//visibility:public"],
+    name = "types",
+    hdrs = ["types.h"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "compiler",
-  hdrs = ["compiler.h"],
-  srcs = ["compiler.cc"],
-  deps = [
-    ":types",
-    "//third_party/glad:glad",
-    "//util/report:macros",
-  ],
-  visibility = ["//visibility:public"],
+    name = "compiler",
+    srcs = ["compiler.cc"],
+    hdrs = ["compiler.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":types",
+        "//third_party/glad",
+        "//util/report:macros",
+    ],
 )
 
 cc_library(
-  name = "shader",
-  hdrs = ["shader.h"],
-  srcs = ["shader.cc"],
-  deps = [
-    ":types",
-    ":compiler",
-    "//third_party/glad:glad",
-    "//util/report:macros",
-  ],
-  visibility = ["//visibility:public"],
+    name = "shader",
+    srcs = ["shader.cc"],
+    hdrs = ["shader.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":compiler",
+        ":types",
+        "//third_party/glad",
+        "//util/report:macros",
+    ],
+)
+
+cc_library(
+    name = "shaders",
+    srcs = [
+        "compiler.cc",
+        "shader.cc",
+    ],
+    hdrs = [
+        "compiler.h",
+        "shader.h",
+        "types.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":compiler",
+        ":shader",
+        ":types",
+        "//third_party/glad",
+        "//util/report:macros",
+    ],
 )

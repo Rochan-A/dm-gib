@@ -9,6 +9,10 @@
 
 #include "engine/core/types.h"
 
+#include "third_party/imgui/backends/imgui_impl_glfw.h"
+#include "third_party/imgui/backends/imgui_impl_opengl3.h"
+#include "third_party/imgui/imgui.h"
+
 static constexpr int kDefaultWidth = 800;
 static constexpr int kDefaultHeight = 600;
 static constexpr size_t kFrameDelta = 120;
@@ -17,8 +21,9 @@ namespace gib {
 
 // Struct updated on each window tick with current time and delta time since
 // last frame.
-struct Tick {
-  Tick(time_util::TimePoint current_time, time_util::DurationUsec delta_time)
+struct FrameTick {
+  FrameTick(time_util::TimePoint current_time,
+            time_util::DurationUsec delta_time)
       : current_time(current_time), delta_time(delta_time) {}
 
   // Current time.
@@ -26,7 +31,6 @@ struct Tick {
   // Time in usec since last frame.
   time_util::DurationUsec delta_time;
 };
-typedef struct Tick Tick;
 
 // Track FPS over the last kFrameDelta frames.
 class FpsTracker {
@@ -57,20 +61,36 @@ public:
   }
 
   // Call once per rendered frame.
-  void Tick(const Tick &window_tick) {
+  void Tick(const FrameTick &frame_tick) {
     const auto delta_time = time_util::to_seconds<time_util::DurationUsec>(
-        time_util::elapsed_usec(last_time_, window_tick.current_time));
-    last_time_ = window_tick.current_time;
+        time_util::elapsed_usec(last_time_, frame_tick.current_time));
+    last_time_ = frame_tick.current_time;
 
     const size_t offset = fps_stat.frame_count % kFrameDelta;
     fps_stat.frame_delta_sum += (delta_time - fps_stat.frame_deltas[offset]);
     fps_stat.frame_count++;
 
-    if (downsampler_.UpdateAndCheckIfProcess(window_tick.current_time) ||
+    if (downsampler_.UpdateAndCheckIfProcess(frame_tick.current_time) ||
         fps_stat.frame_delta_sum < 0) {
       DEBUG("Avg FPS: {}", GetAvgFps());
     }
     fps_stat.frame_deltas[offset] = delta_time;
+  }
+
+  void DebugUI() {
+    if (ImGui::CollapsingHeader("FPS", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+      ImGui::Text("Avg FPS: %.2f", GetAvgFps());
+      float frame_dt_s = 0.0f;
+      const auto &stat = fps_stat;
+      if (!stat.frame_deltas.empty()) {
+        size_t idx = stat.frame_count % stat.frame_deltas.size();
+        frame_dt_s = stat.frame_deltas[idx];
+      }
+
+      ImGui::SameLine();
+      ImGui::Text("Frame dt: %.3f ms", 1e3f * frame_dt_s);
+    }
   }
 
   DISALLOW_COPY_AND_ASSIGN(FpsTracker);

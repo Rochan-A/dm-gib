@@ -4,8 +4,22 @@
 namespace gib {
 
 unsigned int ShaderCompiler::LoadAndCompile(const ShaderSource &source) {
-  ShaderSource source_loaded(LoadShader(source), source.type, false);
-  unsigned int shader = Compile(source_loaded, source.type);
+  std::stringstream shader_stream;
+  if (source.is_path) {
+    try {
+      std::ifstream shader_file;
+      shader_file.open(source.shader);
+      shader_stream << shader_file.rdbuf();
+      shader_file.close();
+    } catch (std::ifstream::failure exc) {
+      THROW_FATAL("No support for ShaderSource from path!\n{}",
+                  std::string(source.shader));
+    }
+  }
+  ShaderSource loaded_shader{source.is_path ? shader_stream.str().c_str()
+                                            : source.shader,
+                             source.type, false};
+  unsigned int shader = Compile(loaded_shader, source.type);
   shaders_.push_back(shader);
   return shader;
 }

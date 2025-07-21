@@ -3,21 +3,14 @@
 #include "engine/shaders/types.h"
 #include "util/report/macros.h"
 #include <cstddef>
+#include <fstream>
+#include <sstream>
 #include <vector>
 
 #define GLAD_GL_IMPLEMENTATION
 #include "third_party/glad/glad.h"
 
 namespace gib {
-
-inline const char *LoadShader(const ShaderSource &source) {
-  // TODO
-  if (source.is_path) {
-    THROW_FATAL("No support for ShaderSource from path!\n{}",
-                std::string(source.shader));
-  }
-  return source.shader;
-}
 
 class ShaderCompiler {
 public:
@@ -32,8 +25,8 @@ public:
   // Loads and compiles shader. Returns shader ID.
   unsigned int LoadAndCompile(const ShaderSource &source);
 
-  // Links all compiled shaders into a shader program, and deletes the shaders.
-  // Returns shader program ID.
+  // Links all compiled shaders into a shader program, and deletes the
+  // shaders. Returns shader program ID.
   unsigned int Link();
 
 private:

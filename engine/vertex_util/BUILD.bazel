@@ -1,17 +1,33 @@
 cc_library(
-  name = "types",
-  hdrs = ["types.h"],
-  visibility = ["//visibility:public"],
+    name = "types",
+    hdrs = ["types.h"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "vertex_array",
-  hdrs = ["vertex_array.h"],
-  srcs = ["vertex_array.cc"],
-  deps = [
-    ":types",
-    "//third_party/glad:glad",
-    "//util/report:macros",
-  ],
-  visibility = ["//visibility:public"],
+    name = "vertex_array",
+    srcs = ["vertex_array.cc"],
+    hdrs = ["vertex_array.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":types",
+        "//third_party/glad",
+        "//util/report:macros",
+    ],
+)
+
+cc_library(
+    name = "vertex_util",
+    srcs = ["vertex_array.cc"],
+    hdrs = [
+        "types.h",
+        "vertex_array.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":types",
+        ":vertex_array",
+        "//third_party/glad",
+        "//util/report:macros",
+    ],
 )

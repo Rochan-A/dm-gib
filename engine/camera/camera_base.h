@@ -15,8 +15,8 @@
 namespace gib {
 
 // Euler‑angle limits
-constexpr float kZoomMin = 45.0f;  // tele
-constexpr float kZoomMax = 100.0f; // wide-angle
+static constexpr float kFovMin = 45.0f;
+static constexpr float kFovMax = 140.0f;
 
 // Enum that maps to WASD + QE (or arrows).
 // TODO: Generalize this to any key press?
@@ -34,18 +34,18 @@ template <typename CameraUpdateModel, typename CameraContext> class BaseCamera {
 public:
   BaseCamera(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
              const glm::vec3 init_up = {0.f, 1.f, 0.f},
-             const float init_zoom = kZoomMax, const float init_yaw = -90.f,
+             const float init_fov = kFovMax, const float init_yaw = -90.f,
              const float init_pitch = 0.f, const bool update_enabled = false)
       : position_{init_pos}, world_up_{glm::normalize(init_up)}, yaw_{init_yaw},
-        pitch_{init_pitch}, zoom_{std::clamp(init_zoom, kZoomMin, kZoomMax)},
-        update_enabled_(update_enabled) {
+        pitch_{init_pitch}, update_enabled_(update_enabled) {
+    fov_.Set(init_fov);
     static_cast<CameraUpdateModel *>(this)->UpdateVectors();
   }
   ~BaseCamera() = default;
 
   [[nodiscard]] const glm::vec3 &Position() const noexcept { return position_; }
   [[nodiscard]] const glm::vec3 &Front() const noexcept { return front_; }
-  [[nodiscard]] float Zoom() const noexcept { return zoom_; }
+  [[nodiscard]] float Fov() const noexcept { return fov_.Get(); }
   [[nodiscard]] float Yaw() const noexcept { return yaw_; }
   [[nodiscard]] float Pitch() const noexcept { return pitch_; }
   [[nodiscard]] glm::mat4 GetViewMatrix() const noexcept {
@@ -54,6 +54,9 @@ public:
   void ToggleEnableCameraUpdate(const bool &enable) noexcept {
     update_enabled_ = enable;
   }
+
+  // TODO: Pull model view projection matrix calculation into the camera model
+  // implementation.
 
   void ProcessKeyboard(const Directions &direction,
                        const float &dt_seconds) noexcept {
@@ -89,14 +92,17 @@ public:
   virtual void Tick(const CameraContext &ctx) noexcept { ctx_ = ctx; }
 
   void DebugUI() {
-    const glm::vec3 &p = Position();
-    ImGui::Text("Pos: (%.2f, %.2f, %.2f)", p.x, p.y, p.z);
-    ImGui::Text("Yaw: %.1f°", Yaw());
-    ImGui::Text("Pitch: %.1f°", Pitch());
-    ImGui::Text("Zoom: %.1f° FOV", Zoom());
-    ImGui::Checkbox("Enable camera update?", update_enabled_);
-    ImGui::Separator();
-    static_cast<CameraUpdateModel *>(this)->ImplDebugUI();
+    if (ImGui::CollapsingHeader("Camera Model",
+                                ImGuiTreeNodeFlags_DefaultOpen)) {
+      const glm::vec3 &p = Position();
+      ImGui::Text("Pos: (%.2f, %.2f, %.2f)", p.x, p.y, p.z);
+      ImGui::Text("Yaw: %.1f°", Yaw());
+      ImGui::Text("Pitch: %.1f°", Pitch());
+      ImGui::Text("FOV: %.1f°", Fov());
+      ImGui::Checkbox("Enable camera update?", update_enabled_);
+      ImGui::Separator();
+      static_cast<CameraUpdateModel *>(this)->ImplDebugUI();
+    }
   }
 
 protected:
@@ -105,8 +111,7 @@ protected:
                                    const float &dt_seconds) noexcept {};
   virtual void
   ProcessMouseMovementImpl(const float &x_offset_pixels,
-                           const float &y_offset_pixels,
-                           const bool constrain_pitch = true) noexcept {};
+                           const float &y_offset_pixels) noexcept {};
   virtual void ProcessMouseScrollImpl(const float &y_offset) noexcept {};
   virtual void DebugUIImpl(){};
 
@@ -124,7 +129,7 @@ protected:
   float pitch_;
 
   // Field‑of‑view (degrees)
-  float zoom_;
+  BoundedType<float> fov_{kFovMax, kFovMax, kFovMin};
 
   bool update_enabled_;
 

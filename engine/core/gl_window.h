@@ -1,10 +1,6 @@
 #pragma once
 
 #include "util/macros.h"
-#define GLAD_GL_IMPLEMENTATION
-#include "third_party/glad/glad.h"
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 
 #include "engine/core/core.h"
 #include "engine/core/window_util.h"
@@ -12,23 +8,23 @@
 
 #include "engine/core/input.h"
 #include "engine/core/types.h"
-#include "third_party/imgui/backends/imgui_impl_glfw.h"
+#include <memory>
 
 namespace gib {
 
-static constexpr const char *kStencilFuncNames[] = {"ALWAYS", "EQUAL",
-                                                    "NOTEQUAL"};
+static constexpr const char *kStencilFuncNames[] = {"ALWAYS", "MATCHING",
+                                                    "NOTMATCHING"};
 static constexpr const char *kCullModeNames[] = {"BACK", "FRONT"};
 
 enum StencilTestFunc {
-  Always = GL_ALWAYS,
-  Matching = GL_EQUAL,
-  NotMatching = GL_NOTEQUAL,
+  ALWAYS = GL_ALWAYS,
+  MATCHING = GL_EQUAL,
+  NOTMATCHING = GL_NOTEQUAL,
 };
 
 enum FaceCullSetting {
-  Front = GL_FRONT,
-  Back = GL_BACK,
+  FRONT = GL_FRONT,
+  BACK = GL_BACK,
 };
 
 // Context for the Glfw window.
@@ -46,6 +42,42 @@ struct GlfwWindowContext {
   bool enable_face_cull{false};
   FaceCullSetting face_cull_setting;
   bool enable_seamless_cubemap{false};
+
+  void DebugUI() {
+    if (ImGui::CollapsingHeader("OpenGL Window",
+                                ImGuiTreeNodeFlags_DefaultOpen)) {
+
+      ImGui::Checkbox("Enable VSync", &enable_vsync);
+
+      ImGui::Checkbox("Fullscreen", &fullscreen);
+      ImGui::Checkbox("Resize Updates", &enable_resize_updates);
+      ImGui::Checkbox("Wireframe", &enable_wireframe);
+      ImGui::Checkbox("Depth Test", &enable_depth_test);
+
+      ImGui::Checkbox("Stencil Test", &enable_stencil_test);
+      if (enable_stencil_test) {
+        int func = static_cast<int>(stencil_test_func);
+        if (ImGui::Combo("Func", &func, kStencilFuncNames,
+                         IM_ARRAYSIZE(kStencilFuncNames))) {
+          stencil_test_func = static_cast<StencilTestFunc>(func);
+        }
+        ImGui::Checkbox("Write Stencil", &enable_stencil_updates);
+      }
+
+      ImGui::Checkbox("Alpha Blending", &enable_alpha_blending);
+
+      ImGui::Checkbox("Face Cull", &enable_face_cull);
+      if (enable_face_cull) {
+        int mode = static_cast<int>(face_cull_setting);
+        if (ImGui::Combo("Cull Mode", &mode, kCullModeNames,
+                         IM_ARRAYSIZE(kCullModeNames))) {
+          face_cull_setting = static_cast<FaceCullSetting>(mode);
+        }
+      }
+
+      ImGui::Checkbox("Seamless Cubemap", &enable_seamless_cubemap);
+    }
+  }
 };
 
 // Handles Glfw window, its properties, and inputs.
@@ -63,9 +95,9 @@ public:
 
   const float GetAvgFps() const;
 
-  void Tick(const Tick &window_tick, const GlfwWindowContext &ctx);
+  void Tick(const FrameTick &frame_tick, const GlfwWindowContext &ctx);
 
-  WindowSize GetWindowSize();
+  Size2D GetWindowSize();
   void SetWindowSize(const int width, const int height);
 
   void SetViewportSize(const int width, const int height);
@@ -85,6 +117,8 @@ public:
   void ToggleSeamlessCubemap(const bool &enable_seamless_cubemap);
 
   GlfwWindowContext GetGlfwWindowContext() { return ctx_; }
+
+  void DebugUI();
 
   FpsTracker fps_tracker;
 
