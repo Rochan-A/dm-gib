@@ -21,15 +21,17 @@ template <typename ValueType> class BoundedType {
 public:
   constexpr BoundedType(ValueType value, ValueType max, ValueType min)
       : value_(value), max_(max), min_(min) {}
-  void Set(const ValueType &value) { value_ = std::clamp(value, min_, max_); }
-  const ValueType &Get() const { return value_; }
-  const ValueType &GetMin() const { return min_; }
-  const ValueType &GetMax() const { return max_; }
+  inline void Set(const ValueType &value) {
+    value_ = std::clamp(value, min_, max_);
+  }
+  inline const ValueType &Get() const { return value_; }
+  inline const ValueType &GetMin() const { return min_; }
+  inline const ValueType &GetMax() const { return max_; }
 
 private:
   ValueType value_;
-  ValueType max_;
-  ValueType min_;
+  const ValueType max_;
+  const ValueType min_;
 };
 
 } // namespace gib

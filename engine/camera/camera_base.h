@@ -1,22 +1,20 @@
 #pragma once
 
+#include "engine/core/frame_util.h"
 #include "engine/core/types.h"
+#include "util/macros.h"
 #include <algorithm>
 
-#include "third_party/glm/fwd.hpp"
 #include "third_party/glm/glm.hpp"
 #include "third_party/glm/gtc/matrix_transform.hpp"
-#include "third_party/glm/gtc/type_ptr.hpp"
 
-#include "third_party/imgui/backends/imgui_impl_glfw.h"
-#include "third_party/imgui/backends/imgui_impl_opengl3.h"
 #include "third_party/imgui/imgui.h"
 
 namespace gib {
 
 // Euler‑angle limits
 static constexpr float kFovMin = 45.0f;
-static constexpr float kFovMax = 140.0f;
+static constexpr float kFovMax = 100.0f;
 
 // Enum that maps to WASD + QE (or arrows).
 // TODO: Generalize this to any key press?
@@ -29,8 +27,8 @@ enum class Directions : unsigned char {
   DOWN
 };
 
-// Base camera. Defaults to static.
-template <typename CameraUpdateModel, typename CameraContext> class BaseCamera {
+// Base camera.
+template <typename CameraUpdateModel> class BaseCamera {
 public:
   BaseCamera(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
              const glm::vec3 init_up = {0.f, 1.f, 0.f},
@@ -69,14 +67,12 @@ public:
   }
 
   void ProcessMouseMovement(const float &x_offset_pixels,
-                            const float &y_offset_pixels,
-                            const bool constrain_pitch = true) noexcept {
+                            const float &y_offset_pixels) noexcept {
     if (!update_enabled_) {
       return;
     }
     CameraUpdateModel *model_ptr = static_cast<CameraUpdateModel *>(this);
-    model_ptr->ProcessMouseMovementImpl(x_offset_pixels, y_offset_pixels,
-                                        constrain_pitch);
+    model_ptr->ProcessMouseMovementImpl(x_offset_pixels, y_offset_pixels);
     model_ptr->UpdateVectors();
   }
 
@@ -89,7 +85,7 @@ public:
     model_ptr->UpdateVectors();
   }
 
-  virtual void Tick(const CameraContext &ctx) noexcept { ctx_ = ctx; }
+  virtual void Tick(const FrameTick &frame_tick) noexcept {};
 
   void DebugUI() {
     if (ImGui::CollapsingHeader("Camera Model",
@@ -99,11 +95,15 @@ public:
       ImGui::Text("Yaw: %.1f°", Yaw());
       ImGui::Text("Pitch: %.1f°", Pitch());
       ImGui::Text("FOV: %.1f°", Fov());
-      ImGui::Checkbox("Enable camera update?", update_enabled_);
+      ImGui::Checkbox("Enable camera update?", &update_enabled_);
       ImGui::Separator();
-      static_cast<CameraUpdateModel *>(this)->ImplDebugUI();
+      static_cast<CameraUpdateModel *>(this)->DebugUIImpl();
     }
   }
+
+  virtual void DebugUIImpl(){};
+
+  DISALLOW_COPY_AND_ASSIGN(BaseCamera);
 
 protected:
   // Implemented by derived class.
@@ -113,7 +113,6 @@ protected:
   ProcessMouseMovementImpl(const float &x_offset_pixels,
                            const float &y_offset_pixels) noexcept {};
   virtual void ProcessMouseScrollImpl(const float &y_offset) noexcept {};
-  virtual void DebugUIImpl(){};
 
   // Camera state
   glm::vec3 position_;
@@ -121,8 +120,6 @@ protected:
   glm::vec3 up_{0.f, 1.f, 0.f};
   glm::vec3 right_{1.f, 0.f, 0.f};
   glm::vec3 world_up_;
-
-  CameraContext ctx_;
 
   // Euler angles
   float yaw_;
@@ -150,4 +147,18 @@ private:
     up_ = glm::normalize(glm::cross(right_, front_));
   }
 };
+
+// Static camera model.
+class StaticCameraModel final : public BaseCamera<StaticCameraModel> {
+public:
+  StaticCameraModel(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
+                    const glm::vec3 init_up = {0.f, 1.f, 0.f},
+                    const float init_fov = kFovMax,
+                    const float init_yaw = -90.f, const float init_pitch = 0.f)
+      : BaseCamera(init_pos, init_up, init_fov, init_yaw, init_pitch) {}
+  ~StaticCameraModel() = default;
+
+  DISALLOW_COPY_AND_ASSIGN(StaticCameraModel);
+};
+
 } // namespace gib

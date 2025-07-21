@@ -8,30 +8,8 @@ namespace gib {
 static constexpr float kPitchMin = -89.0f;
 static constexpr float kPitchMax = 89.0f;
 
-struct FlyCameraContext {
-  // Mouse sensitivity (deg/px)
-  BoundedType<float> sensitivity{0.1f, 1.f, 0.01f};
-  // World‑units/s
-  BoundedType<float> velocity{2.f, 10.f, 0.01f};
-
-  void DebugUIImpl() {
-    float speed = velocity.Get();
-    if (ImGui::SliderFloat("Speed (units/s)", &speed, velocity.GetMin(),
-                           velocity.GetMax(), "%.2f")) {
-      velocity.Set(speed);
-    }
-
-    float sensitivity_ = sensitivity.Get();
-    if (ImGui::SliderFloat("Sensitivity (deg/pixel)", &sensitivity_,
-                           sensitivity.GetMin(), sensitivity.GetMax(),
-                           "%.3f")) {
-      sensitivity.Set(sensitivity_);
-    }
-  }
-};
-
 // Fly camera model.
-class FlyCameraModel final : BaseCamera<FlyCameraModel, FlyCameraContext> {
+class FlyCameraModel final : public BaseCamera<FlyCameraModel> {
 public:
   FlyCameraModel(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
                  const glm::vec3 init_up = {0.f, 1.f, 0.f},
@@ -40,7 +18,21 @@ public:
       : BaseCamera(init_pos, init_up, init_zoom, init_yaw, init_pitch, true) {}
   ~FlyCameraModel() = default;
 
-private:
+  void DebugUIImpl() override {
+    float speed = ctx_.velocity.Get();
+    if (ImGui::SliderFloat("Speed (units/s)", &speed, ctx_.velocity.GetMin(),
+                           ctx_.velocity.GetMax(), "%.2f")) {
+      ctx_.velocity.Set(speed);
+    }
+
+    float sensitivity_ = ctx_.sensitivity.Get();
+    if (ImGui::SliderFloat("Sensitivity (deg/pixel)", &sensitivity_,
+                           ctx_.sensitivity.GetMin(), ctx_.sensitivity.GetMax(),
+                           "%.2f")) {
+      ctx_.sensitivity.Set(sensitivity_);
+    }
+  }
+
   void ProcessKeyboardImpl(const Directions &direction,
                            const float &dt_seconds) noexcept override {
     const float displacement = ctx_.velocity.Get() * dt_seconds;
@@ -86,5 +78,17 @@ private:
     // GLFW: positive y_offset means scroll up (zoom in / narrower FOV)
     fov_.Set(fov_.Get() - y_offset);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(FlyCameraModel);
+
+private:
+  struct FlyCameraContext {
+    // Mouse sensitivity (deg/px)
+    BoundedType<float> sensitivity{0.1f, 1.f, 0.01f};
+    // World‑units/s
+    BoundedType<float> velocity{2.f, 10.f, 0.01f};
+  };
+
+  FlyCameraContext ctx_;
 };
 } // namespace gib

@@ -14,7 +14,8 @@ cc_binary(
     name = "flycam",
     srcs = ["flycam.cc"],
     deps = [
-        "//engine/camera:camera",
+        "//engine/camera:camera_base",
+        "//engine/camera:fly_camera",
         "//third_party/concise_args:concise_args",
         "//engine/shaders:shader",
         "//engine/vertex_util:vertex_array",

@@ -1,12 +1,12 @@
 #include "engine/core/gl_window.h"
-#include "engine/core/window_util.h"
+#include "engine/core/frame_util.h"
 
 namespace gib {
 
 GlfwWindow::GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
                        const int width, const int height, const int samples,
                        const float fps_report_dt)
-    : fps_tracker(fps_report_dt), title_{title}, core_(core) {
+    : fps_tracker_(fps_report_dt), title_{title}, core_(core) {
   ASSERT(core->IsInit(),
          "Attempted to construct window for un-initialized Glfw!");
   ASSERT(height > 0 && width > 0, "Width & height must be > 0, got ({}, {})",
@@ -241,23 +241,61 @@ void GlfwWindow::FramebufferSizeCallback(GLFWwindow *window, const int width,
 }
 
 void GlfwWindow::DebugUI() {
-  fps_tracker.DebugUI();
-  ctx_.DebugUI();
+  fps_tracker_.DebugUI();
+
+  GlfwWindowContext ctx = ctx_;
+  if (ImGui::CollapsingHeader("OpenGL Window",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+
+    if (ImGui::Checkbox("Enable VSync", &ctx.enable_vsync)) {
+      ToggleVsync(ctx.enable_vsync);
+    }
+    if (ImGui::Checkbox("Fullscreen", &ctx.fullscreen)) {
+      ToggleFullscreen(ctx.fullscreen);
+    }
+    if (ImGui::Checkbox("Resize Updates", &ctx.enable_resize_updates)) {
+      ToggleResizeUpdates(ctx.enable_resize_updates);
+    }
+    if (ImGui::Checkbox("Wireframe", &ctx.enable_wireframe)) {
+      ToggleWireframe(ctx.enable_wireframe);
+    }
+    if (ImGui::Checkbox("Depth Test", &ctx.enable_depth_test)) {
+      ToggleDepthTest(ctx.enable_depth_test);
+    }
+    if (ImGui::Checkbox("Stencil Test", &ctx.enable_stencil_test)) {
+      ToggleStencilTest(ctx.enable_stencil_test, ctx.stencil_test_func);
+      if (ctx_.enable_stencil_test) {
+        int func = static_cast<int>(ctx.stencil_test_func);
+        if (ImGui::Combo("Func", &func, kStencilFuncNames,
+                         IM_ARRAYSIZE(kStencilFuncNames))) {
+          ctx.stencil_test_func = static_cast<StencilTestFunc>(func);
+        }
+        if (ImGui::Checkbox("Write Stencil", &ctx.enable_stencil_updates)) {
+          ToggleStencilUpdates(ctx.enable_stencil_updates);
+        }
+      }
+    }
+    if (ImGui::Checkbox("Alpha Blending", &ctx.enable_alpha_blending)) {
+      ToggleAlphaBlending(ctx.enable_alpha_blending);
+    }
+    if (ImGui::Checkbox("Face Cull", &ctx.enable_face_cull)) {
+      ToggleFaceCull(ctx.enable_face_cull, ctx.face_cull_setting);
+      if (ctx.enable_face_cull) {
+        int mode = static_cast<int>(ctx.face_cull_setting);
+        if (ImGui::Combo("Cull Mode", &mode, kCullModeNames,
+                         IM_ARRAYSIZE(kCullModeNames))) {
+          ctx.face_cull_setting = static_cast<FaceCullSetting>(mode);
+        }
+      }
+    }
+    if (ImGui::Checkbox("Seamless Cubemap", &ctx.enable_seamless_cubemap)) {
+      ToggleSeamlessCubemap(ctx.enable_seamless_cubemap);
+    }
+  }
 }
 
-void GlfwWindow::Tick(const struct FrameTick &frame_tick,
-                      const GlfwWindowContext &ctx) {
-  fps_tracker.Tick(frame_tick);
-  ToggleVsync(ctx.enable_vsync);
-  ToggleFullscreen(ctx.fullscreen);
-  ToggleResizeUpdates(ctx.enable_resize_updates);
-  ToggleWireframe(ctx.enable_wireframe);
-  ToggleDepthTest(ctx.enable_depth_test);
-  ToggleStencilTest(ctx.enable_stencil_test, ctx.stencil_test_func);
-  ToggleStencilUpdates(ctx.enable_stencil_updates);
-  ToggleAlphaBlending(ctx.enable_alpha_blending);
-  ToggleFaceCull(ctx.enable_face_cull, ctx.face_cull_setting);
-  ToggleSeamlessCubemap(ctx.enable_seamless_cubemap);
+void GlfwWindow::Tick(const FrameTick &frame_tick) {
+  fps_tracker_.Tick(frame_tick);
 }
 
 } // namespace gib

@@ -1,0 +1,20 @@
+cc_library(
+  name = "light_registry",
+  hdrs = ["light_registry.h"],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "light_base",
+  hdrs = ["light_base.h"],
+  visibility = ["//visibility:public"],
+)
+
+cc_library(
+  name = "light",
+  hdrs = ["light.h"],
+  deps = [
+    ":light_base",
+  ],
+  visibility = ["//visibility:public"],
+)

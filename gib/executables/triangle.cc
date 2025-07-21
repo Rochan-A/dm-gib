@@ -1,6 +1,6 @@
+#include "engine/core/frame_util.h"
+#include "engine/core/gl_window.h"
 #include "engine/core/types.h"
-#include "engine/core/window.h"
-#include "engine/core/window_util.h"
 #include "engine/shaders/shader.h"
 #include "third_party/concise_args/ConciseArgs.h"
 
@@ -53,9 +53,9 @@ static const Vertex vertices[3] = {{{-0.6f, -0.4f}, {1.f, 0.f, 0.f}},
 
 namespace gib {
 
-class Triangle final : public BaseWindow<Triangle> {
+class Triangle final : public WindowBase<Triangle> {
 public:
-  Triangle() : BaseWindow("Triangle") {
+  Triangle() : WindowBase("Triangle") {
     ToggleMouseButtonInput(true);
     ToggleKeyInput(true);
     ToggleScrollInput(true);
@@ -75,9 +75,6 @@ public:
     program = shader.GetProgramId();
 
     mvp_location = glGetUniformLocation(program, "MVP");
-    // const GLint vpos_location = glGetAttribLocation(program, "vPos");
-    // const GLint vcol_location = glGetAttribLocation(program, "vCol");
-
     VertexArray vertex_array;
     vertex_array.AddVertexBuffer(&vertices, sizeof(vertices));
     vertex_array.AddVertexAttribute(2, GL_FLOAT, false);
@@ -87,7 +84,7 @@ public:
     vertex_array_vbo = vertex_array.GetVbo();
   }
 
-  void Tick(const Tick &tick, GlfwWindow &window) {
+  void Tick(const FrameTick &tick, GlfwWindow &window) {
     const float ratio = window.GetAspectRatio();
 
     glm::mat4x4 m, p, mvp;
@@ -102,7 +99,7 @@ public:
     glDrawArrays(GL_TRIANGLES, 0, 3);
   }
 
-  void Tock(const struct Tick &tick, GlfwWindow &window) {}
+  void Tock(const struct FrameTick &tick, GlfwWindow &window) {}
 
   void DebugUI(GlfwWindow &window) {}
 
@@ -114,15 +111,6 @@ private:
 } // namespace gib
 
 int main(int argc, char **argv) {
-  bool fullscreen = false;
-  bool debug = false;
-
-  ConciseArgs parser(argc, argv);
-  parser.add<bool>(fullscreen, "f", "fullscreen", "Launch in full screen");
-  parser.add<bool>(debug, "d", "debug", "Enable debug window");
-  parser.parse();
-  DEBUG("Fullscreen {}, debug {}", fullscreen, debug);
-
   gib::Triangle triangle;
   triangle.Run();
 

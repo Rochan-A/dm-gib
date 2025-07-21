@@ -9,8 +9,6 @@
 
 #include "engine/core/types.h"
 
-#include "third_party/imgui/backends/imgui_impl_glfw.h"
-#include "third_party/imgui/backends/imgui_impl_opengl3.h"
 #include "third_party/imgui/imgui.h"
 
 static constexpr int kDefaultWidth = 800;
@@ -22,42 +20,32 @@ namespace gib {
 // Struct updated on each window tick with current time and delta time since
 // last frame.
 struct FrameTick {
-  FrameTick(time_util::TimePoint current_time,
-            time_util::DurationUsec delta_time)
+  FrameTick(const time_util::TimePoint current_time,
+            const time_util::DurationUsec delta_time)
       : current_time(current_time), delta_time(delta_time) {}
 
   // Current time.
-  time_util::TimePoint current_time;
+  const time_util::TimePoint current_time;
   // Time in usec since last frame.
-  time_util::DurationUsec delta_time;
+  const time_util::DurationUsec delta_time;
 };
 
 // Track FPS over the last kFrameDelta frames.
 class FpsTracker {
 public:
-  struct FpsStat {
-    float avg_fps{0.f};
-    size_t frame_count{0};
-    float frame_delta_sum{0.f};
-    std::array<float, kFrameDelta> frame_deltas{0.f};
-  };
-
-  FpsStat fps_stat;
-
   FpsTracker(const float report_dt) {
     downsampler_.SetDt(report_dt);
-    fps_stat.frame_deltas.fill(0.f);
+    fps_stat_.frame_deltas.fill(0.f);
   }
-
   ~FpsTracker() = default;
 
   // Average FPS over the sliding window.
   const float GetAvgFps() const {
-    const int samples = std::min(fps_stat.frame_count, kFrameDelta);
-    if (samples == 0 || fps_stat.frame_delta_sum == 0.f) {
+    const int samples = std::min(fps_stat_.frame_count, kFrameDelta);
+    if (samples == 0 || fps_stat_.frame_delta_sum == 0.f) {
       return 0.f; // nothing recorded yet
     }
-    return samples / fps_stat.frame_delta_sum;
+    return samples / fps_stat_.frame_delta_sum;
   }
 
   // Call once per rendered frame.
@@ -66,15 +54,15 @@ public:
         time_util::elapsed_usec(last_time_, frame_tick.current_time));
     last_time_ = frame_tick.current_time;
 
-    const size_t offset = fps_stat.frame_count % kFrameDelta;
-    fps_stat.frame_delta_sum += (delta_time - fps_stat.frame_deltas[offset]);
-    fps_stat.frame_count++;
+    const size_t offset = fps_stat_.frame_count % kFrameDelta;
+    fps_stat_.frame_delta_sum += (delta_time - fps_stat_.frame_deltas[offset]);
+    fps_stat_.frame_count++;
 
     if (downsampler_.UpdateAndCheckIfProcess(frame_tick.current_time) ||
-        fps_stat.frame_delta_sum < 0) {
+        fps_stat_.frame_delta_sum < 0) {
       DEBUG("Avg FPS: {}", GetAvgFps());
     }
-    fps_stat.frame_deltas[offset] = delta_time;
+    fps_stat_.frame_deltas[offset] = delta_time;
   }
 
   void DebugUI() {
@@ -82,7 +70,7 @@ public:
 
       ImGui::Text("Avg FPS: %.2f", GetAvgFps());
       float frame_dt_s = 0.0f;
-      const auto &stat = fps_stat;
+      const auto &stat = fps_stat_;
       if (!stat.frame_deltas.empty()) {
         size_t idx = stat.frame_count % stat.frame_deltas.size();
         frame_dt_s = stat.frame_deltas[idx];
@@ -98,6 +86,15 @@ public:
 private:
   time_util::DownSampler downsampler_;
   time_util::TimePoint last_time_{time_util::now()};
+
+  struct FpsStat {
+    float avg_fps{0.f};
+    size_t frame_count{0};
+    float frame_delta_sum{0.f};
+    std::array<float, kFrameDelta> frame_deltas{0.f};
+  };
+
+  FpsStat fps_stat_;
 };
 
 } // namespace gib

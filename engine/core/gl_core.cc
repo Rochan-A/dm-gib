@@ -1,4 +1,4 @@
-#include "engine/core/core.h"
+#include "engine/core/gl_core.h"
 
 namespace gib {
 

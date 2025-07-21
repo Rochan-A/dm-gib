@@ -3,8 +3,8 @@ cc_library(
   hdrs = ["window.h"],
   deps = [
     "//third_party/glad:glad",
-    "//engine/core:core",
-    "//engine/core:window",
+    "//engine/core:gl_core",
+    "//engine/core:gl_window",
     "//engine/core:input",
     "//util/imgui:imgui_util",
     "//util/imgui:imgui_window",

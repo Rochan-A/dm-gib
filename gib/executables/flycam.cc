@@ -1,6 +1,6 @@
+#include "engine/core/frame_util.h"
+#include "engine/core/gl_window.h"
 #include "engine/core/types.h"
-#include "engine/core/window.h"
-#include "engine/core/window_util.h"
 #include "engine/shaders/shader.h"
 #include "engine/vertex_util/vertex_array.h"
 
@@ -10,7 +10,8 @@
 #include "third_party/glm/ext/matrix_transform.hpp"
 #include "third_party/glm/gtc/type_ptr.hpp"
 
-#include "engine/camera/camera.h"
+#include "engine/camera/camera_base.h"
+#include "engine/camera/fly_camera.h"
 #include "engine/core/input.h"
 #include "util/time/time.h"
 
@@ -53,9 +54,9 @@ void main() { frag = vec4(color, 1.0); }
 
 namespace gib {
 
-class FlyCamDemo final : public BaseWindow<FlyCamDemo> {
+class FlyCamDemo final : public WindowBase<FlyCamDemo> {
 public:
-  FlyCamDemo() : BaseWindow("FlyCam Demo"), camera_(glm::vec3(0.f, 2.f, 5.f)) {
+  FlyCamDemo() : WindowBase("FlyCam Demo"), camera_(glm::vec3(0.f, 2.f, 5.f)) {
     ToggleMouseButtonInput(true);
     ToggleKeyInput(true);
     ToggleScrollInput(true);
@@ -83,13 +84,14 @@ public:
     floor_vao_ = vao.GetVbo();
   }
 
-  void Tick(const Tick &tick, GlfwWindow &window) {
-    camera_.Tick(ctx_.camera_ctx);
-    float dt = time_util::to_seconds<time_util::DurationUsec>(tick.delta_time);
+  void Tick(const FrameTick &frame_tick, GlfwWindow &window) {
+    camera_.Tick(frame_tick);
+    float dt =
+        time_util::to_seconds<time_util::DurationUsec>(frame_tick.delta_time);
     ProcessInput(dt);
 
     glm::mat4 view = camera_.GetViewMatrix();
-    glm::mat4 proj = glm::perspective(glm::radians(camera_.Zoom()),
+    glm::mat4 proj = glm::perspective(glm::radians(camera_.Fov()),
                                       window.GetAspectRatio(), 0.1f, 100.0f);
     glm::mat4 model = glm::identity<glm::mat4>();
     glm::mat4 mvp = proj * view * model;
@@ -101,54 +103,38 @@ public:
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
-  void Tock(const struct Tick &tick, GlfwWindow &window) {}
+  void Tock(const struct FrameTick &tick, GlfwWindow &window) {}
 
-  void DebugUI(GlfwWindow &window) {
-    // Optional: use ImGui to tweak camera params.
-    if (ImGui::CollapsingHeader("Camera State",
-                                ImGuiTreeNodeFlags_DefaultOpen)) {
-      // -- Editable context
-      // -----------------------------------------------------
-      CameraContext ctx = ctx_.camera_ctx;
-
-      float speed = ctx.velocity.value;
-      if (ImGui::SliderFloat("Speed (units/s)", &speed, ctx.velocity.lo,
-                             ctx.velocity.hi, "%.2f")) {
-        ctx_.camera_ctx.velocity.Set(speed);
-      }
-
-      float sens = ctx.sensitivity.value;
-      if (ImGui::SliderFloat("Sensitivity (deg/pixel)", &sens,
-                             ctx.sensitivity.lo, ctx.sensitivity.hi, "%.3f")) {
-        ctx_.camera_ctx.sensitivity.Set(sens);
-      }
-
-      ImGui::Separator();
-
-      const glm::vec3 &p = camera_.Position();
-      ImGui::Text("Pos: (%.2f, %.2f, %.2f)", p.x, p.y, p.z);
-      ImGui::Text("Yaw: %.1f°", camera_.Yaw());
-      ImGui::Text("Pitch: %.1f°", camera_.Pitch());
-      ImGui::Text("Zoom: %.1f° FOV", camera_.Zoom());
-    }
-  }
+  void DebugUI(GlfwWindow &window) { camera_.DebugUI(); }
 
 private:
   /*================ Input Handling ================*/
   void ProcessInput(float dt) {
     Input input = GetInput();
     // WASD + Space + Shift
-    if (input.key_state[GLFW_KEY_W] == KeyAction::PRESS)
+    if (input.key_state[GLFW_KEY_W] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_W] == KeyAction::REPEAT)
       camera_.ProcessKeyboard(Directions::FORWARD, dt);
-    if (input.key_state[GLFW_KEY_S] == KeyAction::PRESS)
+    if (input.key_state[GLFW_KEY_S] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_S] == KeyAction::REPEAT)
       camera_.ProcessKeyboard(Directions::BACKWARD, dt);
-    if (input.key_state[GLFW_KEY_A] == KeyAction::PRESS)
+    if (input.key_state[GLFW_KEY_A] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_A] == KeyAction::REPEAT)
       camera_.ProcessKeyboard(Directions::LEFT, dt);
-    if (input.key_state[GLFW_KEY_D] == KeyAction::PRESS)
+    if (input.key_state[GLFW_KEY_D] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_D] == KeyAction::REPEAT)
       camera_.ProcessKeyboard(Directions::RIGHT, dt);
-    if (input.key_state[GLFW_KEY_SPACE] == KeyAction::PRESS)
+    if (input.key_state[GLFW_KEY_SPACE] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_SPACE] == KeyAction::REPEAT)
       camera_.ProcessKeyboard(Directions::UP, dt);
-    if (input.key_state[GLFW_KEY_LEFT_SHIFT] == KeyAction::PRESS)
+    if (input.key_state[GLFW_KEY_LEFT_SHIFT] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_LEFT_SHIFT] == KeyAction::REPEAT)
+      camera_.ProcessKeyboard(Directions::DOWN, dt);
+    if (input.key_state[GLFW_KEY_Q] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_Q] == KeyAction::REPEAT)
+      camera_.ProcessKeyboard(Directions::UP, dt);
+    if (input.key_state[GLFW_KEY_E] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_E] == KeyAction::REPEAT)
       camera_.ProcessKeyboard(Directions::DOWN, dt);
 
     // Mouse look — first frame just sets baseline
@@ -156,14 +142,15 @@ private:
       last_mouse_pos_ = input.mouse_pos;
       first_mouse_ = false;
     }
-    glm::vec2 delta = input.mouse_pos - last_mouse_pos_;
-    last_mouse_pos_ = input.mouse_pos;
-    camera_.ProcessMouseMovement(delta.x, -delta.y); // invert Y
-
-    // Mouse wheel zoom
-    if (input.scroll_offset.y != 0.0f) {
-      camera_.ProcessMouseScroll(input.scroll_offset.y);
-      input.scroll_offset = {0.f, 0.f};
+    if (ctx_.enable_mouse_capture) {
+      Offset delta = input.mouse_pos - last_mouse_pos_;
+      last_mouse_pos_ = input.mouse_pos;
+      camera_.ProcessMouseMovement(delta.x, -delta.y); // invert Y
+      // Mouse wheel zoom
+      if (input.scroll_offset.y != 0.0f) {
+        camera_.ProcessMouseScroll(input.scroll_offset.y);
+        input.scroll_offset = {0.f, 0.f};
+      }
     }
   }
 
@@ -171,9 +158,9 @@ private:
   GLint mvp_loc_ = -1;
   unsigned int floor_vao_ = 0;
 
-  Camera camera_;
+  FlyCameraModel camera_;
 
-  glm::vec2 last_mouse_pos_{0.f, 0.f};
+  Offset last_mouse_pos_{0.f, 0.f};
   bool first_mouse_ = true;
 };
 
@@ -182,5 +169,6 @@ private:
 int main(int argc, char **argv) {
   gib::FlyCamDemo demo;
   demo.Run();
+
   return 0;
 }
