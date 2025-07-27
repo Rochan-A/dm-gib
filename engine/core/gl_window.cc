@@ -4,13 +4,13 @@
 namespace gib {
 
 GlfwWindow::GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
-                       const int width, const int height, const int samples,
+                       const Size2D &size, const int samples,
                        const float fps_report_dt)
-    : fps_tracker_(fps_report_dt), title_{title}, core_(core) {
+    : title_{title}, fps_tracker_(fps_report_dt), core_(core) {
   ASSERT(core->IsInit(),
          "Attempted to construct window for un-initialized Glfw!");
-  ASSERT(height > 0 && width > 0, "Width & height must be > 0, got ({}, {})",
-         width, height);
+  ASSERT(size.Width() > 0 && size.Height() > 0,
+         "Width & height must be > 0, got {}", size);
 
   monitor_ = glfwGetPrimaryMonitor();
   const GLFWvidmode *mode = glfwGetVideoMode(monitor_);
@@ -29,8 +29,8 @@ GlfwWindow::GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
 #endif
 
   // Start in windowed mode.
-  glfw_window_ptr_ =
-      glfwCreateWindow(width, height, title_.c_str(), nullptr, nullptr);
+  glfw_window_ptr_ = glfwCreateWindow(size.Width(), size.Height(),
+                                      title_.c_str(), nullptr, nullptr);
   ASSERT(glfw_window_ptr_ != nullptr, "GLFW window failed to initialize");
 
   glfwMakeContextCurrent(glfw_window_ptr_);
@@ -59,15 +59,15 @@ Size2D GlfwWindow::GetWindowSize() {
   return size;
 }
 
-void GlfwWindow::SetWindowSize(const int width, const int height) {
-  ASSERT(height > 0 && width > 0, "Width & height must be > 0, got ({}, {})",
-         width, height);
-  glfwSetWindowSize(glfw_window_ptr_, width, height);
-  DEBUG("Set window size to height: {}, width: {}.", height, width);
+void GlfwWindow::SetWindowSize(const Size2D &size) {
+  ASSERT(size.Width() > 0 && size.Height() > 0,
+         "Width & height must be > 0, got {}", size);
+  glfwSetWindowSize(glfw_window_ptr_, size.Width(), size.Height());
+  DEBUG("Set window size to {}.", size);
 }
 
-void GlfwWindow::SetViewportSize(const int width, const int height) {
-  glViewport(0, 0, width, height);
+void GlfwWindow::SetViewportSize(const Size2D &size) {
+  glViewport(0, 0, size.Width(), size.Height());
 }
 
 void GlfwWindow::ToggleFullscreen(const bool &fullscreen) {
@@ -98,7 +98,7 @@ void GlfwWindow::ToggleResizeUpdates(const bool &enable_resize_updates) {
   }
   if (enable_resize_updates) {
     auto callback = [](GLFWwindow *window, int width, int height) {
-      auto self = static_cast<GlfwWindow *>(glfwGetWindowUserPointer(window));
+      auto *self = static_cast<GlfwWindow *>(glfwGetWindowUserPointer(window));
       self->FramebufferSizeCallback(window, width, height);
     };
     glfwSetFramebufferSizeCallback(glfw_window_ptr_, callback);
@@ -230,14 +230,14 @@ void GlfwWindow::ToggleSeamlessCubemap(const bool &enable_seamless_cubemap) {
   DEBUG("Seamless cubemap enabled: {}", enable_seamless_cubemap);
 }
 
-const float GlfwWindow::GetAspectRatio() {
-  Size2D size = GetWindowSize();
+float GlfwWindow::GetAspectRatio() {
+  Size2D const size = GetWindowSize();
   return static_cast<float>(size.Width()) / static_cast<float>(size.Height());
 }
 
-void GlfwWindow::FramebufferSizeCallback(GLFWwindow *window, const int width,
-                                         const int height) {
-  SetViewportSize(width, height);
+void GlfwWindow::FramebufferSizeCallback(GLFWwindow * /*window*/,
+                                         const int width, const int height) {
+  SetViewportSize(Size2D(width, height));
 }
 
 void GlfwWindow::DebugUI() {

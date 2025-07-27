@@ -5,8 +5,8 @@
 #include "util/macros.h"
 #include <algorithm>
 
-#include "third_party/glm/glm.hpp"
-#include "third_party/glm/gtc/matrix_transform.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "third_party/imgui/imgui.h"
 
@@ -17,7 +17,7 @@ static constexpr float kFovMin = 45.0f;
 static constexpr float kFovMax = 100.0f;
 
 // Enum that maps to WASD + QE (or arrows).
-// TODO: Generalize this to any key press?
+// TODO(rochan): Generalize this to any key press?
 enum class Directions : unsigned char {
   FORWARD,
   BACKWARD,
@@ -30,10 +30,12 @@ enum class Directions : unsigned char {
 // Base camera.
 template <typename CameraUpdateModel> class BaseCamera {
 public:
-  BaseCamera(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
-             const glm::vec3 init_up = {0.f, 1.f, 0.f},
-             const float init_fov = kFovMax, const float init_yaw = -90.f,
-             const float init_pitch = 0.f, const bool update_enabled = false)
+  explicit BaseCamera(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
+                      const glm::vec3 init_up = {0.f, 1.f, 0.f},
+                      const float init_fov = kFovMax,
+                      const float init_yaw = -90.f,
+                      const float init_pitch = 0.f,
+                      const bool update_enabled = false)
       : position_{init_pos}, world_up_{glm::normalize(init_up)}, yaw_{init_yaw},
         pitch_{init_pitch}, update_enabled_(update_enabled) {
     fov_.Set(init_fov);
@@ -53,15 +55,15 @@ public:
     update_enabled_ = enable;
   }
 
-  // TODO: Pull model view projection matrix calculation into the camera model
-  // implementation.
+  // TODO(rochan): Pull model view projection matrix calculation into the camera
+  // model implementation.
 
   void ProcessKeyboard(const Directions &direction,
                        const float &dt_seconds) noexcept {
     if (!update_enabled_) {
       return;
     }
-    CameraUpdateModel *model_ptr = static_cast<CameraUpdateModel *>(this);
+    auto *model_ptr = static_cast<CameraUpdateModel *>(this);
     model_ptr->ProcessKeyboardImpl(direction, dt_seconds);
     model_ptr->UpdateVectors();
   }
@@ -71,7 +73,7 @@ public:
     if (!update_enabled_) {
       return;
     }
-    CameraUpdateModel *model_ptr = static_cast<CameraUpdateModel *>(this);
+    auto *model_ptr = static_cast<CameraUpdateModel *>(this);
     model_ptr->ProcessMouseMovementImpl(x_offset_pixels, y_offset_pixels);
     model_ptr->UpdateVectors();
   }
@@ -80,7 +82,7 @@ public:
     if (!update_enabled_) {
       return;
     }
-    CameraUpdateModel *model_ptr = static_cast<CameraUpdateModel *>(this);
+    auto *model_ptr = static_cast<CameraUpdateModel *>(this);
     model_ptr->ProcessMouseScrollImpl(y_offset);
     model_ptr->UpdateVectors();
   }
@@ -90,8 +92,9 @@ public:
   void DebugUI() {
     if (ImGui::CollapsingHeader("Camera Model",
                                 ImGuiTreeNodeFlags_DefaultOpen)) {
-      const glm::vec3 &p = Position();
-      ImGui::Text("Pos: (%.2f, %.2f, %.2f)", p.x, p.y, p.z);
+      const glm::vec3 &position = Position();
+      ImGui::Text("Pos: (%.2f, %.2f, %.2f)", position.x, position.y,
+                  position.z);
       ImGui::Text("Yaw: %.1f°", Yaw());
       ImGui::Text("Pitch: %.1f°", Pitch());
       ImGui::Text("FOV: %.1f°", Fov());
@@ -151,12 +154,13 @@ private:
 // Static camera model.
 class StaticCameraModel final : public BaseCamera<StaticCameraModel> {
 public:
-  StaticCameraModel(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
-                    const glm::vec3 init_up = {0.f, 1.f, 0.f},
-                    const float init_fov = kFovMax,
-                    const float init_yaw = -90.f, const float init_pitch = 0.f)
+  explicit StaticCameraModel(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
+                             const glm::vec3 init_up = {0.f, 1.f, 0.f},
+                             const float init_fov = kFovMax,
+                             const float init_yaw = -90.f,
+                             const float init_pitch = 0.f)
       : BaseCamera(init_pos, init_up, init_fov, init_yaw, init_pitch) {}
-  ~StaticCameraModel() = default;
+  ~StaticCameraModel() = delete;
 
   DISALLOW_COPY_AND_ASSIGN(StaticCameraModel);
 };

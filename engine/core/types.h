@@ -1,7 +1,8 @@
 #pragma once
 
-#include "third_party/glm/vec2.hpp"
 #include <algorithm>
+#include <glm/vec2.hpp>
+#include <iostream>
 
 namespace gib {
 
@@ -13,9 +14,14 @@ struct Size2D : glm::vec<2, int> {
     x = width;
     y = height;
   }
-  const int &Width() const { return x; }
-  const int &Height() const { return y; };
+  [[nodiscard]] const int &Width() const { return x; }
+  [[nodiscard]] const int &Height() const { return y; };
 };
+
+inline std::ostream &operator<<(std::ostream &stream, const Size2D &size) {
+  stream << "{w: " << size.Width() << ", h: " << size.Height() << "}";
+  return stream;
+}
 
 template <typename ValueType> class BoundedType {
 public:

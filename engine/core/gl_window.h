@@ -4,7 +4,7 @@
 
 #include "engine/core/frame_util.h"
 #include "engine/core/gl_core.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 
 #include "engine/core/input.h"
 #include "engine/core/types.h"
@@ -47,25 +47,24 @@ class GlfwWindow {
   };
 
 public:
-  explicit GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
-                      const int width = kDefaultWidth,
-                      const int height = kDefaultHeight, const int samples = 0,
-                      const float fps_report_dt = 5.0);
+  explicit GlfwWindow(std::shared_ptr<GLCore> &core, std::string title,
+                      Size2D size = {kDefaultWidth, kDefaultHeight},
+                      int samples = 0, float fps_report_dt = 5.0f);
 
   ~GlfwWindow() = default;
 
   // Returns pointer to GLFW window.
-  GLFWwindow *GetGlfwWindowPtr();
+  [[nodiscard]] GLFWwindow *GetGlfwWindowPtr();
 
-  const float GetAvgFps() const;
+  [[nodiscard]] const float GetAvgFps() const;
 
   void Tick(const FrameTick &frame_tick);
 
   Size2D GetWindowSize();
-  void SetWindowSize(const int width, const int height);
+  void SetWindowSize(const Size2D &size);
 
-  void SetViewportSize(const int width, const int height);
-  const float GetAspectRatio();
+  void SetViewportSize(const Size2D &size);
+  float GetAspectRatio();
 
   void ToggleFullscreen(const bool &fullscreen);
   void ToggleResizeUpdates(const bool &enable_resize_updates);
@@ -80,15 +79,16 @@ public:
                       const FaceCullSetting &face_cull_setting);
   void ToggleSeamlessCubemap(const bool &enable_seamless_cubemap);
 
-  const GlfwWindowContext &GetGlfwWindowContext() const { return ctx_; }
+  [[nodiscard]] const GlfwWindowContext &GetGlfwWindowContext() const {
+    return ctx_;
+  }
 
   void DebugUI();
 
   DISALLOW_COPY_AND_ASSIGN(GlfwWindow);
 
 private:
-  void FramebufferSizeCallback(GLFWwindow *window, const int width,
-                               const int height);
+  void FramebufferSizeCallback(GLFWwindow *window, int width, int height);
 
   const std::string title_;
   bool context_initialized_{false};

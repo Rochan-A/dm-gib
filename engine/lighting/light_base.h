@@ -9,7 +9,7 @@ public:
 
 template <typename LightMesh> class LightMeshBase {
 public:
-  LightMeshBase() {}
+  LightMeshBase() = default;
   ~LightMeshBase() = default;
 };
 

@@ -13,7 +13,7 @@ public:
 
   // Initializes front buffer with given data, other buffers are default
   // initialized
-  LockFreeTripleBuffer(DataType &&initial_front_buf)
+  explicit LockFreeTripleBuffer(DataType &&initial_front_buf)
       : buffers_{{}, {}, {std::forward<DataType>(initial_front_buf)}} {}
 
   // Initializes all 3 buffers
@@ -66,7 +66,7 @@ private:
     DataType data{};
   };
 
-  Buffer buffers_[3];
+  std::array<Buffer, 3> buffers_;
 
   std::atomic<uintptr_t> middle_buffer_{
       reinterpret_cast<uintptr_t>(&buffers_[1].data)};

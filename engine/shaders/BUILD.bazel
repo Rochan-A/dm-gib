@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
     name = "types",
     hdrs = ["types.h"],
@@ -12,7 +14,7 @@ cc_library(
     deps = [
         ":types",
         "//third_party/glad",
-        "//util/report:macros",
+        "//util/report",
     ],
 )
 
@@ -25,7 +27,7 @@ cc_library(
         ":compiler",
         ":types",
         "//third_party/glad",
-        "//util/report:macros",
+        "//util/report",
     ],
 )
 
@@ -46,6 +48,6 @@ cc_library(
         ":shader",
         ":types",
         "//third_party/glad",
-        "//util/report:macros",
+        "//util/report",
     ],
 )

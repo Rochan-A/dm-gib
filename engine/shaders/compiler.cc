@@ -11,34 +11,29 @@ unsigned int ShaderCompiler::LoadAndCompile(const ShaderSource &source) {
       shader_file.open(source.shader);
       shader_stream << shader_file.rdbuf();
       shader_file.close();
-    } catch (std::ifstream::failure exc) {
+    } catch (const std::ifstream::failure &exc) {
       THROW_FATAL("No support for ShaderSource from path!\n{}",
                   std::string(source.shader));
     }
   }
-  ShaderSource loaded_shader{source.is_path ? shader_stream.str().c_str()
-                                            : source.shader,
-                             source.type, false};
-  unsigned int shader = Compile(loaded_shader, source.type);
+  ShaderSource const loaded_shader{source.is_path ? shader_stream.str().c_str()
+                                                  : source.shader,
+                                   source.type, false};
+  unsigned int const shader = Compile(loaded_shader, source.type);
   shaders_.push_back(shader);
   return shader;
 }
 
 unsigned int ShaderCompiler::Link() {
-  int success;
-  unsigned int shader_program = glCreateProgram();
+  int success = false;
+  unsigned int const shader_program = glCreateProgram();
   for (const auto &shader : shaders_) {
     glAttachShader(shader_program, shader);
   }
   glLinkProgram(shader_program);
 
   glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-  if (!success) {
-    char error[512];
-    glGetProgramInfoLog(shader_program, 512, nullptr, error);
-    THROW_FATAL("Failed to link shader(s) (len: {})!\n{}", shaders_.size(),
-                error);
-  }
+  CHECK_GL_PROGRAM_ERROR(success, glGetProgramInfoLog, shader_program);
 
   for (const auto &shader : shaders_) {
     glDeleteShader(shader);
@@ -49,19 +44,15 @@ unsigned int ShaderCompiler::Link() {
 
 unsigned int ShaderCompiler::Compile(const ShaderSource &source,
                                      const ShaderType type) {
-  GLint success = false;
-  unsigned int shader = glCreateShader((GLenum)type);
+  unsigned int const shader = glCreateShader(static_cast<GLenum>(type));
 
   glShaderSource(shader, 1, &source.shader, nullptr);
   glCompileShader(shader);
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-  if (!success) {
-    char error[512];
-    glGetShaderInfoLog(shader, 512, nullptr, error);
-    THROW_FATAL("Compiling shader {} (type: {}) failed!\n{}",
-                std::string(source.shader), (unsigned char)type, error);
-  }
+  GLint success = false;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  CHECK_GL_PROGRAM_ERROR(success, glGetShaderInfoLog, shader);
+
   return shader;
 }
 

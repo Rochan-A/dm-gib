@@ -1,20 +1,33 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
-  name = "light_registry",
-  hdrs = ["light_registry.h"],
-  visibility = ["//visibility:public"],
+    name = "light_registry",
+    hdrs = ["light_registry.h"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "light_base",
-  hdrs = ["light_base.h"],
-  visibility = ["//visibility:public"],
+    name = "light_base",
+    hdrs = ["light_base.h"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "light",
-  hdrs = ["light.h"],
-  deps = [
-    ":light_base",
-  ],
-  visibility = ["//visibility:public"],
+    name = "light",
+    hdrs = ["light.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":light_base",
+    ],
+)
+
+cc_library(
+    name = "lighting",
+    hdrs = [
+        "light.h",
+        "light_base.h",
+        "light_registry.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":light_base"],
 )

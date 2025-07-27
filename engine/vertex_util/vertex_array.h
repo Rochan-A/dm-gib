@@ -6,7 +6,7 @@
 #include "third_party/glad/glad.h"
 
 #include "engine/vertex_util/types.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 
 namespace gib {
 // Ref: https://learnopengl.com/Getting-started/Hello-Triangle
@@ -30,8 +30,8 @@ public:
 
   ~VertexArray() = default;
 
-  void SetActive();
-  void SetDeactive();
+  void SetActive() const;
+  void SetDeactive() const;
 
   void AddVertexBuffer(const void *data, const size_t &size,
                        const GLenum usage = GL_STATIC_DRAW);
@@ -42,14 +42,13 @@ public:
   void AddInstanceVertexBuffer(const void *data, const size_t &size,
                                const GLenum usage = GL_STATIC_DRAW);
 
-  void AddVertexAttribute(const size_t size, const GLenum type,
-                          const bool normalized);
+  void AddVertexAttribute(size_t size, GLenum type, bool normalized);
 
   void Apply();
 
-  unsigned int GetVao() const { return vao_; }
-  unsigned int GetVbo() const { return vbo_; }
-  unsigned int GetEbo() const { return ebo_; }
+  [[nodiscard]] unsigned int GetVao() const { return vao_; }
+  [[nodiscard]] unsigned int GetVbo() const { return vbo_; }
+  [[nodiscard]] unsigned int GetEbo() const { return ebo_; }
 
 private:
   // Vertex array obj.

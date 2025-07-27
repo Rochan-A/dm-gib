@@ -1,21 +1,37 @@
-cc_library(
-  name = "camera_base",
-  hdrs = ["camera_base.h"],
-  deps = [
-    "//third_party/glad:glad",
-    "//third_party/imgui:imgui",
-    "//third_party/glm:glm",
-    "//engine/core:types",
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
-  ],
-  visibility = ["//visibility:public"],
+cc_library(
+    name = "camera_base",
+    hdrs = ["camera_base.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//engine/core:types",
+        "//third_party/glad",
+        "//third_party/imgui:imgui",
+    ],
 )
 
 cc_library(
-  name = "fly_camera",
-  hdrs = ["fly_camera.h"],
-  deps = [
-    ":camera_base"
-  ],
-  visibility = ["//visibility:public"],
+    name = "fly_camera",
+    hdrs = ["fly_camera.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera_base",
+    ],
+)
+
+cc_library(
+    name = "camera",
+    hdrs = [
+        "camera_base.h",
+        "fly_camera.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":camera_base",
+        "//engine/core",
+        "//engine/core:types",
+        "//util:macros",
+        "@glm",
+    ],
 )

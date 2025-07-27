@@ -9,7 +9,6 @@ enum class ShaderType : GLenum {
   VERTEX = GL_VERTEX_SHADER,
   FRAGMENT = GL_FRAGMENT_SHADER,
   GEOMETRY = GL_GEOMETRY_SHADER,
-  // COMPUTE = GL_COMPUTE_SHADER,
 };
 
 struct ShaderSource {

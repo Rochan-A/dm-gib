@@ -3,13 +3,14 @@
 #include <array>
 
 #include "util/macros.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 #include "util/time/downsampler.h"
 #include "util/time/time.h"
 
 #include "engine/core/types.h"
 
 #include "third_party/imgui/imgui.h"
+#include <cstddef>
 
 static constexpr int kDefaultWidth = 800;
 static constexpr int kDefaultHeight = 600;
@@ -33,19 +34,20 @@ struct FrameTick {
 // Track FPS over the last kFrameDelta frames.
 class FpsTracker {
 public:
-  FpsTracker(const float report_dt) {
+  explicit FpsTracker(const float report_dt) {
     downsampler_.SetDt(report_dt);
     fps_stat_.frame_deltas.fill(0.f);
   }
   ~FpsTracker() = default;
 
   // Average FPS over the sliding window.
-  const float GetAvgFps() const {
-    const int samples = std::min(fps_stat_.frame_count, kFrameDelta);
+  [[nodiscard]] float GetAvgFps() const {
+    const auto samples =
+        static_cast<int>(std::min(fps_stat_.frame_count, kFrameDelta));
     if (samples == 0 || fps_stat_.frame_delta_sum == 0.f) {
       return 0.f; // nothing recorded yet
     }
-    return samples / fps_stat_.frame_delta_sum;
+    return static_cast<float>(samples) / fps_stat_.frame_delta_sum;
   }
 
   // Call once per rendered frame.
@@ -72,7 +74,7 @@ public:
       float frame_dt_s = 0.0f;
       const auto &stat = fps_stat_;
       if (!stat.frame_deltas.empty()) {
-        size_t idx = stat.frame_count % stat.frame_deltas.size();
+        size_t const idx = stat.frame_count % stat.frame_deltas.size();
         frame_dt_s = stat.frame_deltas[idx];
       }
 

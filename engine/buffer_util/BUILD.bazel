@@ -1,20 +1,22 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
-  name = "lock_free_double_buffer",
-  hdrs = ["lock_free_double_buffer.h"],
-  visibility = ["//visibility:public"],
+    name = "lock_free_double_buffer",
+    hdrs = ["lock_free_double_buffer.h"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "lock_free_triple_buffer",
-  hdrs = ["lock_free_triple_buffer.h"],
-  visibility = ["//visibility:public"],
+    name = "lock_free_triple_buffer",
+    hdrs = ["lock_free_triple_buffer.h"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "buffer_util",
-  deps = [
-    ":lock_free_double_buffer",
-    ":lock_free_triple_buffer",
-  ],
-  visibility = ["//visibility:public"],
+    name = "buffer_util",
+    hdrs = [
+        "lock_free_double_buffer.h",
+        "lock_free_triple_buffer.h",
+    ],
+    visibility = ["//visibility:public"],
 )

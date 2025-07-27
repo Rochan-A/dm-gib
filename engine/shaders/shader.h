@@ -5,19 +5,21 @@
 
 #include "engine/shaders/compiler.h"
 #include "engine/shaders/types.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 
 namespace gib {
 
 class Shader {
 public:
   Shader() = default;
-  Shader(const ShaderSource &source);
+  explicit Shader(const ShaderSource &source);
   Shader(const ShaderSource &source1, const ShaderSource &source2);
 
   ~Shader() = default;
 
-  inline unsigned int GetProgramId() const { return shader_program_; }
+  [[nodiscard]] inline unsigned int GetProgramId() const {
+    return shader_program_;
+  }
 
   void Link();
 

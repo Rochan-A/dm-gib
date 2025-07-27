@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/shaders/types.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 #include <cstddef>
 #include <fstream>
 #include <sstream>
@@ -31,7 +31,7 @@ public:
 
 private:
   // Compiles shaders.
-  unsigned int Compile(const ShaderSource &source, const ShaderType type);
+  static unsigned int Compile(const ShaderSource &source, ShaderType type);
 
   std::vector<unsigned int> shaders_;
 };

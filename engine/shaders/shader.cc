@@ -1,7 +1,7 @@
 #include "engine/shaders/shader.h"
 #include "engine/shaders/compiler.h"
 #include "engine/shaders/types.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 
 namespace gib {
 

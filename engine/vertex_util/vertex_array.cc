@@ -4,9 +4,9 @@ namespace gib {
 
 VertexArray::VertexArray() { glGenVertexArrays(1, &vao_); }
 
-void VertexArray::SetActive() { glBindVertexArray(vao_); }
+void VertexArray::SetActive() const { glBindVertexArray(vao_); }
 
-void VertexArray::SetDeactive() { glBindVertexArray(vao_); }
+void VertexArray::SetDeactive() const { glBindVertexArray(vao_); }
 
 void VertexArray::AddVertexBuffer(const void *data, const size_t &size,
                                   const GLenum usage) {
@@ -18,7 +18,7 @@ void VertexArray::AddVertexBuffer(const void *data, const size_t &size,
   SetActive();
   glGenBuffers(1, &vbo_);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-  glBufferData(GL_ARRAY_BUFFER, size, data, usage);
+  glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, usage);
 }
 
 void VertexArray::AddElementBuffer(const void *data, const size_t &size,

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/macros.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 
 #define GLAD_GL_IMPLEMENTATION
 #include "third_party/glad/glad.h"
@@ -17,13 +17,13 @@ public:
   ~GLCore();
 
   // Enable/Disable GLFW error logging.
-  void ToggleGlfwErrorLogging(const bool enable);
+  void ToggleGlfwErrorLogging(bool enable);
 
   // Enable/Disable OpenGL error logging.
-  void ToggleOpenGlErrorLogging(const bool enable);
+  void ToggleOpenGlErrorLogging(bool enable);
 
   // Returns True if glfw is initialized.
-  bool IsInit() const { return glfw_init_success_ == GLFW_TRUE; }
+  [[nodiscard]] bool IsInit() const { return glfw_init_success_ == GLFW_TRUE; }
 
   DISALLOW_COPY_AND_ASSIGN(GLCore);
 

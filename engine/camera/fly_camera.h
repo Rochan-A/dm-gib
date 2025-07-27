@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/camera/camera_base.h"
+#include "engine/core/types.h"
 
 namespace gib {
 
@@ -8,13 +9,20 @@ namespace gib {
 static constexpr float kPitchMin = -89.0f;
 static constexpr float kPitchMax = 89.0f;
 
+static constexpr float kMaxSensitivity = 0.01f;
+static constexpr float kMinSensitivity = 10.f;
+
+static constexpr float kMaxVelocity = 0.1f;
+static constexpr float kMinVelocity = 100.f;
+
 // Fly camera model.
 class FlyCameraModel final : public BaseCamera<FlyCameraModel> {
 public:
-  FlyCameraModel(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
-                 const glm::vec3 init_up = {0.f, 1.f, 0.f},
-                 const float init_zoom = kFovMax, const float init_yaw = -90.f,
-                 const float init_pitch = 0.f)
+  explicit FlyCameraModel(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
+                          const glm::vec3 init_up = {0.f, 1.f, 0.f},
+                          const float init_zoom = kFovMax,
+                          const float init_yaw = -90.f,
+                          const float init_pitch = 0.f)
       : BaseCamera(init_pos, init_up, init_zoom, init_yaw, init_pitch, true) {}
   ~FlyCameraModel() = default;
 
@@ -70,7 +78,7 @@ public:
     yaw_ += x_offset_pixels * ctx_.sensitivity.Get();
     pitch_ += y_offset_pixels * ctx_.sensitivity.Get();
     // Pitch is constrained.
-    // TODO: Pull out into camera model param?
+    // TODO(rochan): Pull out into camera model param?
     pitch_ = std::clamp(pitch_, kPitchMin, kPitchMax);
   }
 
@@ -84,9 +92,10 @@ public:
 private:
   struct FlyCameraContext {
     // Mouse sensitivity (deg/px)
-    BoundedType<float> sensitivity{0.1f, 1.f, 0.01f};
+    BoundedType<float> sensitivity{kMinSensitivity, kMaxSensitivity,
+                                   kMinSensitivity};
     // World‑units/s
-    BoundedType<float> velocity{2.f, 10.f, 0.01f};
+    BoundedType<float> velocity{kMinVelocity, kMaxVelocity, kMinVelocity};
   };
 
   FlyCameraContext ctx_;

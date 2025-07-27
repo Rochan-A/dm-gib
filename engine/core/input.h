@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/macros.h"
-#include "util/report/macros.h"
+#include "util/report/report.h"
 #include <array>
 
 #define GLFW_INCLUDE_NONE
@@ -52,12 +52,12 @@ struct Input {
 
   void Reset() { scroll_offset = {0.f, 0.f}; }
 
-  void KeyCallback(int key, int scancode, int action, int mods) {
-    key_state[key] = KeyAction(action);
+  void KeyCallback(int key, int /*scancode*/, int action, int /*mods*/) {
+    key_state[key] = static_cast<KeyAction>(action);
   }
 
-  void MouseButtonCallback(int button, int action, int mods) {
-    mouse_button_state[button] = MouseButtonAction(action);
+  void MouseButtonCallback(int button, int action, int /*mods*/) {
+    mouse_button_state[button] = static_cast<MouseButtonAction>(action);
   }
 
   void ScrollCallback(const double xoffset, const double yoffset) {

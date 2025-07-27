@@ -13,7 +13,7 @@ public:
 
   // Initializes front buffer with given data, other buffer is default
   // initialized.
-  LockFreeDoubleBuffer(DataType &&initial_front_buf)
+  explicit LockFreeDoubleBuffer(DataType &&initial_front_buf)
       : buffers_{{}, {std::forward<DataType>(initial_front_buf)}} {}
 
   // Initializes both the buffers.
@@ -64,7 +64,7 @@ private:
     DataType data{};
   };
 
-  Buffer buffers_[2];
+  std::array<Buffer, 2> buffers_;
 
   std::atomic<uintptr_t> back_buffer_{
       reinterpret_cast<uintptr_t>(&buffers_[0].data)};

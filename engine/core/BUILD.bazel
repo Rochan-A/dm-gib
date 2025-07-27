@@ -1,65 +1,94 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
-  name = "gl_core",
-  srcs = ["gl_core.cc"],
-  hdrs = ["gl_core.h"],
-  deps = [
-    "//third_party/glad:glad",
-    "@glfw",
-    "//util/report:macros",
-    "//util:macros",
-  ],
-  visibility = ["//visibility:public"],
+    name = "gl_core",
+    srcs = ["gl_core.cc"],
+    hdrs = ["gl_core.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party/glad",
+        "//util:macros",
+        "//util/report",
+        "@glfw",
+    ],
 )
 
 cc_library(
-  name = "frame_util",
-  srcs = ["frame_util.h"],
-  deps = [
-    "//util/report:macros",
-    "//util/time:downsampler",
-    "//util/time:time",
-    "//util:macros",
-    "//third_party/imgui:imgui",
-    ":types",
-  ],
-  visibility = ["//visibility:public"],
+    name = "frame_util",
+    srcs = ["frame_util.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":types",
+        "//util:macros",
+        "//util/report",
+        "//util/time",
+        "//util/time:downsampler",
+        "//third_party/imgui:imgui",
+    ],
 )
 
 cc_library(
-  name = "input",
-  srcs = ["input.h"],
-  deps = [
-    "//third_party/glad:glad",
-    "@glfw",
-    "//util:macros",
-    ":types",
-  ],
-  visibility = ["//visibility:public"],
+    name = "input",
+    srcs = ["input.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":types",
+        "//third_party/glad",
+        "//util:macros",
+        "@glfw",
+    ],
 )
 
 cc_library(
-  name = "gl_window",
-  srcs = ["gl_window.cc"],
-  hdrs = ["gl_window.h"],
-  deps = [
-    "//third_party/glad:glad",
-    "@glfw",
-    "//engine/core:gl_core",
-    "//engine/core:input",
-    "//util/report:macros",
-    "//util/time:downsampler",
-    "//util:macros",
-    ":frame_util",
-    ":types",
-  ],
-  visibility = ["//visibility:public"],
+    name = "gl_window",
+    srcs = ["gl_window.cc"],
+    hdrs = ["gl_window.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":frame_util",
+        ":types",
+        "//engine/core:gl_core",
+        "//engine/core:input",
+        "//third_party/glad",
+        "//util:macros",
+        "//util/report",
+        "//util/time:downsampler",
+        "@glfw",
+    ],
 )
 
 cc_library(
-  name = "types",
-  hdrs = ["types.h"],
-  deps = [
-    "@glm"
-  ],
-  visibility = ["//visibility:public"]
+    name = "types",
+    hdrs = ["types.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@glm",
+    ],
+)
+
+cc_library(
+    name = "core",
+    srcs = [
+        "gl_core.cc",
+        "gl_window.cc",
+    ],
+    hdrs = [
+        "frame_util.h",
+        "gl_core.h",
+        "gl_window.h",
+        "input.h",
+        "types.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":gl_core",
+        ":gl_window",
+        ":types",
+        "//third_party/glad",
+        "//util:macros",
+        "//util/report",
+        "//util/time",
+        "//util/time:downsampler",
+        "@glm",
+    ],
 )
