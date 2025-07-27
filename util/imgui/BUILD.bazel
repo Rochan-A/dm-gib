@@ -1,21 +1,39 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
-  name = "imgui_window",
-  srcs = ["imgui_window.cc"],
-  hdrs = ["imgui_window.h"],
-  deps = [
-    "//third_party/glad:glad",
-    "//util/report:macros",
-    "//util:macros",
-    "//third_party/imgui:imgui",
-  ],
-  visibility = ["//visibility:public"],
+    name = "imgui_window",
+    srcs = ["imgui_window.cc"],
+    hdrs = ["imgui_window.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party/glad",
+        "//util:macros",
+        "//util/report",
+        "@glfw",  # keep
+        "//third_party/imgui:imgui",
+    ],
 )
 
 cc_library(
-  name = "imgui_util",
-  hdrs = ["imgui_util.h"],
-  deps = [
-    "//third_party/imgui:imgui",
-  ],
-  visibility = ["//visibility:public"],
+    name = "imgui_util",
+    hdrs = ["imgui_util.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+    ],
+)
+
+cc_library(
+    name = "imgui",
+    srcs = ["imgui_window.cc"],
+    hdrs = [
+        "imgui_util.h",
+        "imgui_window.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":imgui_window",
+        "//third_party/glad",
+        "//util:macros",
+        "//util/report",
+    ],
 )

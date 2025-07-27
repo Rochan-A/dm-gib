@@ -1,7 +1,6 @@
 exports_files(
-  [
-    "spider.obj",
-    "cobblestone/model.obj",
-  ],
-  visibility = ["//visibility:public"],
+    [
+        "spider.obj",
+    ],
+    visibility = ["//visibility:public"],
 )

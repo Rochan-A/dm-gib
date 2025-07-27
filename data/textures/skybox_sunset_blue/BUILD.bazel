@@ -1,0 +1,11 @@
+exports_files(
+    [
+        "nx.png",
+        "ny.png",
+        "nz.png",
+        "px.png",
+        "py.png",
+        "pz.png",
+    ],
+    visibility = ["//visibility:public"],
+)

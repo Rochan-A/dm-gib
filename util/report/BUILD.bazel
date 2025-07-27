@@ -1,19 +1,14 @@
-cc_library(
-  name = "error",
-  hdrs = ["error.h"],
-  deps = [
-    ":macros",
-    "//third_party/glad:glad",
-  ],
-  visibility = ["//visibility:public"],
-)
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 cc_library(
-  name = "macros",
-  hdrs = ["macros.h"],
-  deps = [
-    "@fmt",
-    "//util/time:time",
-  ],
-  visibility = ["//visibility:public"],
+    name = "report",
+    hdrs = [
+        "report.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party/glad",
+        "//util/time",
+        "@fmt",
+    ],
 )

@@ -15,7 +15,6 @@ DARWIN_HDRS = [
     "src/cocoa_joystick.h",
     "src/cocoa_platform.h",
     "src/cocoa_time.h",
-    # "src/nsgl_context.h",
     "src/posix_thread.h",
     "src/wl_platform.h",
 ]

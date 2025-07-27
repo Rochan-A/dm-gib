@@ -10,12 +10,13 @@ ImGuiWindow::ImGuiWindow(GLFWwindow *glfw_window_ptr,
   // Dear ImGui Setup
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO &io = ImGui::GetIO();
-  io.ConfigFlags |=
-      ImGuiConfigFlags_NavEnableKeyboard;           // Enable Keyboard Controls
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+  ImGuiIO &imgui_io = ImGui::GetIO();
+  imgui_io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+  imgui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
   if (multi_viewport) {
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport
+    imgui_io.ConfigFlags |=
+        ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport
   }
   ImGui::StyleColorsDark();
   ImGuiStyle &style = ImGui::GetStyle();

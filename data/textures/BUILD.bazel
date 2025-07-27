@@ -1,6 +1,6 @@
 exports_files(
-  [
-    "dirt.jpg"
-  ],
-  visibility = ["//visibility:public"],
+    [
+        "dirt.jpg",
+    ],
+    visibility = ["//visibility:public"],
 )

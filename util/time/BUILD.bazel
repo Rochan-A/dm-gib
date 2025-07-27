@@ -1,14 +1,19 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
-  name = "downsampler",
-  hdrs = ["downsampler.h"],
-  deps = [
-    ":time",
-  ],
-  visibility = ["//visibility:public"],
+    name = "downsampler",
+    hdrs = ["downsampler.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":time",
+    ],
 )
 
 cc_library(
-  name = "time",
-  hdrs = ["time.h"],
-  visibility = ["//visibility:public"],
+    name = "time",
+    hdrs = [
+        "downsampler.h",
+        "time.h",
+    ],
+    visibility = ["//visibility:public"],
 )

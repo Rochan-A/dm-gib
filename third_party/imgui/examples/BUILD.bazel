@@ -1,9 +1,0 @@
-cc_binary(
-    name = "imgui_glfw_opengl",
-    srcs = ["imgui_glfw_opengl.cc"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//third_party/imgui:imgui",
-        "@glfw",
-    ],
-)
