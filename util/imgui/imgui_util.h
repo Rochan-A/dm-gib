@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "//third_party/imgui/imgui.h"
+#include "third_party/imgui/imgui.h"
 
 namespace imgui_util {
 

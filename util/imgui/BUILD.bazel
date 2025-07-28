@@ -7,10 +7,10 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//third_party/glad",
+        "//third_party/imgui",
         "//util:macros",
         "//util/report",
         "@glfw",  # keep
-        "//third_party/imgui:imgui",
     ],
 )
 
@@ -33,6 +33,7 @@ cc_library(
     deps = [
         ":imgui_window",
         "//third_party/glad",
+        "//third_party/imgui",
         "//util:macros",
         "//util/report",
     ],

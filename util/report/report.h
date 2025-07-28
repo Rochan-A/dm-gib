@@ -173,7 +173,8 @@ inline void LogMessage(const char *level, const char *file, const int line,
 #define CHECK_GL_ERROR()                                                       \
   do {                                                                         \
     GLenum error = glGetError();                                               \
-    ASSERT(error == GL_NO_ERROR, "ERROR::GL::{}", GlErrorToString(error));     \
+    ASSERT(error == GL_NO_ERROR, "ERROR::GL::{}",                              \
+           report::GlErrorToString(error));                                    \
   } while (0)
 
 static constexpr int kMaxLogLength = 1024;
