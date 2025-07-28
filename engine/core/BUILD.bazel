@@ -19,11 +19,11 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":types",
+        "//third_party/imgui",
         "//util:macros",
         "//util/report",
         "//util/time",
         "//util/time:downsampler",
-        "//third_party/imgui:imgui",
     ],
 )
 
@@ -85,10 +85,12 @@ cc_library(
         ":gl_window",
         ":types",
         "//third_party/glad",
+        "//third_party/imgui",
         "//util:macros",
         "//util/report",
         "//util/time",
         "//util/time:downsampler",
+        "@fmt",
         "@glm",
     ],
 )

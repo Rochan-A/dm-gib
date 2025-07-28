@@ -27,7 +27,9 @@ cc_library(
         ":compiler",
         ":types",
         "//third_party/glad",
+        "//util:macros",
         "//util/report",
+        "@glm",
     ],
 )
 
@@ -48,6 +50,8 @@ cc_library(
         ":shader",
         ":types",
         "//third_party/glad",
+        "//util:macros",
         "//util/report",
+        "@glm",
     ],
 )

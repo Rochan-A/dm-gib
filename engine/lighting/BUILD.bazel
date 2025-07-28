@@ -29,5 +29,8 @@ cc_library(
         "light_registry.h",
     ],
     visibility = ["//visibility:public"],
-    deps = [":light_base"],
+    deps = [
+        ":light_base",
+        "@glm",
+    ],
 )

@@ -1,0 +1,17 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "window",
+    srcs = ["window.cc"],
+    hdrs = ["window.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//engine/core",
+        "//engine/core:gl_core",
+        "//engine/core:gl_window",
+        "//util:macros",
+        "//util/imgui:imgui_util",
+        "//util/imgui:imgui_window",
+        "//util/report",
+    ],
+)

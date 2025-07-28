@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <fmt/format.h>
 #include <glm/vec2.hpp>
 #include <iostream>
 
@@ -18,9 +19,9 @@ struct Size2D : glm::vec<2, int> {
   [[nodiscard]] const int &Height() const { return y; };
 };
 
-inline std::ostream &operator<<(std::ostream &stream, const Size2D &size) {
-  stream << "{w: " << size.Width() << ", h: " << size.Height() << "}";
-  return stream;
+inline std::string to_string(const Size2D &size) {
+  return fmt::format("Size2D(width={}, height={})", size.Width(),
+                     size.Height());
 }
 
 template <typename ValueType> class BoundedType {

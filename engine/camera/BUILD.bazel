@@ -7,7 +7,7 @@ cc_library(
     deps = [
         "//engine/core:types",
         "//third_party/glad",
-        "//third_party/imgui:imgui",
+        "//third_party/imgui",
     ],
 )
 
@@ -31,6 +31,7 @@ cc_library(
         ":camera_base",
         "//engine/core",
         "//engine/core:types",
+        "//third_party/imgui",
         "//util:macros",
         "@glm",
     ],

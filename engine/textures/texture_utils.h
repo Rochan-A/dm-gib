@@ -4,13 +4,19 @@
 #include <vector>
 
 #include "engine/core/types.h"
+#include "util/report/report.h"
 
 #define GLAD_GL_IMPLEMENTATION
 #include "third_party/glad/glad.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/texture.h>
+
 namespace gib {
 
-// Type of texture.
+// Type of texture. Currently supports 2D and CUBEMAP.
 enum class TextureType : GLenum {
   TEXTURE_2D = GL_TEXTURE_2D,
   CUBE_MAP = GL_TEXTURE_CUBE_MAP
@@ -73,7 +79,61 @@ enum class MipFiltering : GLenum {
   LINEAR_MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR,
 };
 
-// Returns the number of mips for an image of a given width/height.
+enum class TextureFormat : GLenum {
+  R_8 = GL_R8,
+  RG_8 = GL_RG8,
+  SRGB_8 = GL_SRGB8,
+  RGB_8 = GL_RGB8,
+  SRGBA_8 = GL_SRGB8_ALPHA8,
+  RGBA_8 = GL_RGBA8,
+  // HDR formats
+  HDR_R = GL_R16F,
+  HDR_RG = GL_RG16F,
+  HDR_RGB = GL_RGB16F,
+  HDR_RGBA = GL_RGBA16F,
+};
+
+// The type of map, i.e. how the underlying texture is meant to be used.
+enum class TextureMapType {
+  DIFFUSE = 0,
+  SPECULAR,
+  ROUGHNESS,
+  METALLIC,
+  AO,
+  EMISSION,
+  NORMAL,
+  CUBEMAP,
+};
+
+inline std::vector<aiTextureType>
+TextureMapTypeToAssimpTextureTypes(const TextureMapType type) {
+  switch (type) {
+  case TextureMapType::DIFFUSE:
+    return {aiTextureType_DIFFUSE};
+  case TextureMapType::SPECULAR:
+    // Use metalness for specularity as well. When this is loaded as a
+    // combined "metalnessRoughnessTexture", shaders should read the blue
+    // channel.
+    return {aiTextureType_SPECULAR, aiTextureType_METALNESS};
+  case TextureMapType::ROUGHNESS:
+    return {aiTextureType_DIFFUSE_ROUGHNESS};
+  case TextureMapType::METALLIC:
+    return {aiTextureType_METALNESS};
+  case TextureMapType::AO:
+    // For whatever reason, assimp stores AO maps as "lightmaps", even though
+    // there's AssimpTextureType_AMBIENT_OCCLUSION...
+    return {aiTextureType_LIGHTMAP};
+  case TextureMapType::EMISSION:
+    return {aiTextureType_EMISSIVE};
+  case TextureMapType::NORMAL:
+    return {aiTextureType_NORMALS};
+  default:
+    THROW_FATAL("ERROR::TEXTURE_MAP::INVALID_TEXTURE_MAP_TYPE {}", type);
+  }
+}
+
+// Returns the number of mips given width and height. Includes the original
+// level.
 inline int GetNumMips(const Size2D &size) {
   return 1 + static_cast<int>(
                  std::floor(std::log2(std::max(size.Width(), size.Height()))));
@@ -86,7 +146,7 @@ inline Size2D GetNextMipSize(const Size2D &mip_size) {
 }
 
 // Returns the calculated size for a specified mip level given width and height
-// at mip level-0.
+// at mip level-0 (i.e., original size).
 inline Size2D GetMipLevel(const Size2D &base_size, const int level) {
   Size2D size{base_size.Width(), base_size.Height()};
   if (level == 0) {

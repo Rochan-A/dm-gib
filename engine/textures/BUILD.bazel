@@ -1,9 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
-  name = "texture_manager",
-  srcs = ["texture_manager.h"],
-  deps = [
-    "//third_party/glad:glad",
-    "@glfw",
-  ],
-  visibility = ["//visibility:public"],
+    name = "texture",
+    srcs = ["texture.cc"],
+    hdrs = [
+        "texture.h",
+        "texture_utils.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//engine/core:types",
+        "//engine/shaders:shader",
+        "//third_party/glad",
+        "//util/report",
+        "@assimp",  # keep
+        "@glm",
+        "@stb//:stb_image",  # keep
+    ],
 )

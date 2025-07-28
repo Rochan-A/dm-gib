@@ -9,11 +9,11 @@ namespace gib {
 static constexpr float kPitchMin = -89.0f;
 static constexpr float kPitchMax = 89.0f;
 
-static constexpr float kMaxSensitivity = 0.01f;
-static constexpr float kMinSensitivity = 10.f;
+static constexpr float kMinSensitivity = 0.01f;
+static constexpr float kMaxSensitivity = 10.f;
 
-static constexpr float kMaxVelocity = 0.1f;
-static constexpr float kMinVelocity = 100.f;
+static constexpr float kMinVelocity = 0.1f;
+static constexpr float kMaxVelocity = 100.f;
 
 // Fly camera model.
 class FlyCameraModel final : public BaseCamera<FlyCameraModel> {
@@ -78,7 +78,6 @@ public:
     yaw_ += x_offset_pixels * ctx_.sensitivity.Get();
     pitch_ += y_offset_pixels * ctx_.sensitivity.Get();
     // Pitch is constrained.
-    // TODO(rochan): Pull out into camera model param?
     pitch_ = std::clamp(pitch_, kPitchMin, kPitchMax);
   }
 

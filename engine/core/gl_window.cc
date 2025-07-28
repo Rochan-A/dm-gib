@@ -4,13 +4,13 @@
 namespace gib {
 
 GlfwWindow::GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
-                       const Size2D &size, const int samples,
+                       Size2D size, const int samples,
                        const float fps_report_dt)
     : title_{title}, fps_tracker_(fps_report_dt), core_(core) {
   ASSERT(core->IsInit(),
          "Attempted to construct window for un-initialized Glfw!");
   ASSERT(size.Width() > 0 && size.Height() > 0,
-         "Width & height must be > 0, got {}", size);
+         "Width & height must be > 0, got {}", to_string(size));
 
   monitor_ = glfwGetPrimaryMonitor();
   const GLFWvidmode *mode = glfwGetVideoMode(monitor_);
@@ -61,9 +61,9 @@ Size2D GlfwWindow::GetWindowSize() {
 
 void GlfwWindow::SetWindowSize(const Size2D &size) {
   ASSERT(size.Width() > 0 && size.Height() > 0,
-         "Width & height must be > 0, got {}", size);
+         "Width & height must be > 0, got {}", to_string(size));
   glfwSetWindowSize(glfw_window_ptr_, size.Width(), size.Height());
-  DEBUG("Set window size to {}.", size);
+  DEBUG("Set window size to {}.", to_string(size));
 }
 
 void GlfwWindow::SetViewportSize(const Size2D &size) {
