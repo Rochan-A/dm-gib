@@ -63,7 +63,8 @@ enum class TextureFiltering : unsigned char {
 };
 
 // Mipmap filtering scheme
-enum class MipFiltering : GLenum {
+enum class MipFiltering {
+  BASED_ON_TEXTURE_FILTERING = 0,
   // Takes the nearest mipmap to match the pixel size and uses nearest neighbor
   // interpolation for texture sampling.
   NEAREST_MINMAP_NEAREST = GL_NEAREST_MIPMAP_NEAREST,

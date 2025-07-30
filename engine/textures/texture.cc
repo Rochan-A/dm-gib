@@ -319,9 +319,11 @@ void Texture::ApplyTextureParams(const TextureParams &params,
       glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY, kMaxAnisotropySamples);
     }
     break;
+  default:
+    THROW_FATAL("Invalid TextureFiltering value {}!", params.filtering);
   }
 
-  switch (params.warp_mode) {
+  switch (params.wrap_mode) {
   case TextureWrapMode::REPEAT:
     glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -352,6 +354,31 @@ void Texture::ApplyTextureParams(const TextureParams &params,
     glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR,
                      glm::value_ptr(params.border_color));
     break;
+  default:
+    THROW_FATAL("Invalid TextureWrapMode value {}!", params.wrap_mode);
+  }
+
+  switch (params.mip_filtering) {
+  case MipFiltering::BASED_ON_TEXTURE_FILTERING:
+    break;
+  case MipFiltering::LINEAR_MIPMAP_LINEAR:
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    break;
+  case MipFiltering::LINEAR_MIPMAP_NEAREST:
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_NEAREST);
+    break;
+  case MipFiltering::NEAREST_MIPMAP_LINEAR:
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_NEAREST_MIPMAP_LINEAR);
+    break;
+  case MipFiltering::NEAREST_MINMAP_NEAREST:
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_NEAREST_MIPMAP_NEAREST);
+    break;
+  default:
+    THROW_FATAL("Invalid MipFiltering value {}!", params.mip_filtering);
   }
 }
 

@@ -31,10 +31,10 @@ struct TextureParams {
   // Texture filtering.
   TextureFiltering filtering{TextureFiltering::ANISOTROPIC};
   // Texture wrap mode.
-  TextureWrapMode warp_mode{TextureWrapMode::REPEAT};
+  TextureWrapMode wrap_mode{TextureWrapMode::REPEAT};
   glm::vec4 border_color{0.0f, 0.0f, 0.0f, 1.0f};
   MipGeneration mip_generation{MipGeneration::ON_LOAD};
-  MipFiltering mip_filtering{MipFiltering::NEAREST_MINMAP_NEAREST};
+  MipFiltering mip_filtering{MipFiltering::BASED_ON_TEXTURE_FILTERING};
   // Maximum number of mips to allocate. If negative, kMaxMip is used.
   int max_num_mip{-1};
 };
