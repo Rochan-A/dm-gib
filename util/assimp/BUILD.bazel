@@ -1,0 +1,16 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "assimp",
+    srcs = ["model_importer.cc"],
+    hdrs = ["model_importer.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//engine/core:gl_core",
+        "//engine/core:gl_window",
+        "//engine/mesh",
+        "//engine/textures:texture",
+        "//util/report",
+        "@glm",
+    ],
+)
