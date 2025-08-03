@@ -16,7 +16,7 @@ static constexpr int kNumMouseButtons = GLFW_MOUSE_BUTTON_LAST + 1;
 
 namespace gib {
 
-// Behavior of Left Mouse Button
+// Behavior of Left Mouse Button.
 enum class MouseButtonBehavior : unsigned char {
   NONE = 0,
   CAPTURE = 1,
@@ -43,6 +43,7 @@ enum class MouseButtonAction : unsigned char {
 // Key states.
 enum class KeyAction : unsigned char { UNKNOWN, RELEASE, PRESS, REPEAT };
 
+// Struct containing input state.
 struct Input {
   std::array<KeyAction, kNumKeys> key_state{};
   std::array<MouseButtonAction, kNumMouseButtons> mouse_button_state{};

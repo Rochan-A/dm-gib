@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "engine/core/input.h"
 #include "third_party/imgui/imgui.h"
 
 namespace gib {
@@ -16,18 +17,8 @@ namespace gib {
 static constexpr float kFovMin = 45.0f;
 static constexpr float kFovMax = 100.0f;
 
-// Enum that maps to WASD + QE (or arrows).
-// TODO(rochan): Generalize this to any key press?
-enum class Directions : unsigned char {
-  FORWARD,
-  BACKWARD,
-  LEFT,
-  RIGHT,
-  UP,
-  DOWN
-};
-
-// Base camera.
+// Base camera. Derived class is responsible for implementing ProcessInputImpl()
+// that updates internal state which influences the projection matrix.
 template <typename CameraUpdateModel> class BaseCamera {
 public:
   explicit BaseCamera(const glm::vec3 init_pos = {0.f, 0.f, 3.f},
@@ -55,35 +46,13 @@ public:
     update_enabled_ = enable;
   }
 
-  // TODO(rochan): Pull model view projection matrix calculation into the camera
-  // model implementation.
-
-  void ProcessKeyboard(const Directions &direction,
-                       const float &dt_seconds) noexcept {
+  void ProcessInput(const Input &input, const float &dt_seconds) noexcept {
+    PROFILE_SCOPE_N("camera::ProcessInput");
     if (!update_enabled_) {
       return;
     }
     auto *model_ptr = static_cast<CameraUpdateModel *>(this);
-    model_ptr->ProcessKeyboardImpl(direction, dt_seconds);
-    model_ptr->UpdateVectors();
-  }
-
-  void ProcessMouseMovement(const float &x_offset_pixels,
-                            const float &y_offset_pixels) noexcept {
-    if (!update_enabled_) {
-      return;
-    }
-    auto *model_ptr = static_cast<CameraUpdateModel *>(this);
-    model_ptr->ProcessMouseMovementImpl(x_offset_pixels, y_offset_pixels);
-    model_ptr->UpdateVectors();
-  }
-
-  void ProcessMouseScroll(const float &y_offset) noexcept {
-    if (!update_enabled_) {
-      return;
-    }
-    auto *model_ptr = static_cast<CameraUpdateModel *>(this);
-    model_ptr->ProcessMouseScrollImpl(y_offset);
+    model_ptr->ProcessInputImpl(input, dt_seconds);
     model_ptr->UpdateVectors();
   }
 
@@ -110,12 +79,8 @@ public:
 
 protected:
   // Implemented by derived class.
-  virtual void ProcessKeyboardImpl(const Directions &direction,
-                                   const float &dt_seconds) noexcept {};
-  virtual void
-  ProcessMouseMovementImpl(const float &x_offset_pixels,
-                           const float &y_offset_pixels) noexcept {};
-  virtual void ProcessMouseScrollImpl(const float &y_offset) noexcept {};
+  virtual void ProcessInputImpl(const Input &input,
+                                const float &dt_seconds) noexcept {};
 
   // Camera state
   glm::vec3 position_;

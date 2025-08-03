@@ -90,10 +90,10 @@ private:
   time_util::TimePoint last_time_{time_util::now()};
 
   struct FpsStat {
-    float avg_fps{0.f};
-    size_t frame_count{0};
-    float frame_delta_sum{0.f};
     std::array<float, kFrameDelta> frame_deltas{0.f};
+    size_t frame_count{0};
+    float avg_fps{0.f};
+    float frame_delta_sum{0.f};
   };
 
   FpsStat fps_stat_;

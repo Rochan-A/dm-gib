@@ -3,14 +3,33 @@
 
 namespace gib {
 
-GlfwWindow::GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
-                       Size2D size, const int samples,
-                       const float fps_report_dt)
-    : title_{title}, fps_tracker_(fps_report_dt), core_(core) {
-  ASSERT(core->IsInit(),
-         "Attempted to construct window for un-initialized Glfw!");
-  ASSERT(size.Width() > 0 && size.Height() > 0,
-         "Width & height must be > 0, got {}", to_string(size));
+// Callback that prints warning for GLFW errors.
+inline void GlfwErrorPrintCallback(int error, const char *description) {
+  WARNING("GLFW ERROR: {} [error code {}]\n", description, error);
+}
+
+// Callback that prints warning for OpenGL errors.
+inline void GLAPIENTRY GlDebugPrintCallback(GLenum /*source*/, GLenum type,
+                                            GLuint /*id*/, GLenum severity,
+                                            GLsizei /*length*/,
+                                            const GLchar *message,
+                                            const void * /*user_param*/) {
+  if (type == GL_DEBUG_TYPE_ERROR) {
+    WARNING("GL ERROR: {} [error type = 0x{}, severity = 0x{}]", message, type,
+            severity);
+  }
+}
+
+GlfwWindow::GlfwWindow(const std::string title, const Size2D size,
+                       const int samples, const float fps_report_dt)
+    : title_{title}, fps_tracker_(fps_report_dt) {
+  glfw_init_success_ = glfwInit();
+  ASSERT(glfw_init_success_ == GLFW_TRUE, "Failed to initialize GLFW!");
+  DEBUG("Successfully initialized GLFW");
+  ToggleGlfwErrorLogging(true);
+
+  ASSERT(size.Width() && size.Height(), "Width & height must be > 0, got {}",
+         to_string(size));
 
   monitor_ = glfwGetPrimaryMonitor();
   const GLFWvidmode *mode = glfwGetVideoMode(monitor_);
@@ -36,7 +55,7 @@ GlfwWindow::GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
   glfwMakeContextCurrent(glfw_window_ptr_);
 
   gladLoadGL();
-  core_->ToggleOpenGlErrorLogging(true);
+  ToggleOpenGlErrorLogging(true);
 
   // Enable multisampling if needed.
   if (samples > 0) {
@@ -46,6 +65,44 @@ GlfwWindow::GlfwWindow(std::shared_ptr<GLCore> &core, const std::string title,
   ToggleResizeUpdates(true);
   ToggleVsync(true);
   DEBUG("Window setup complete.");
+}
+
+GlfwWindow::~GlfwWindow() {
+  if (glfw_init_success_ != GLFW_TRUE) {
+    WARNING("GLFW failed to initialize, not calling glfwTerminate()");
+    return;
+  }
+  glfwTerminate();
+}
+
+void GlfwWindow::ToggleGlfwErrorLogging(const bool enable) {
+  if (glfw_error_logging_enabled_ == enable) {
+    return;
+  }
+  if (enable) {
+    glfwSetErrorCallback(&GlfwErrorPrintCallback);
+  } else {
+    glfwSetErrorCallback(nullptr);
+  }
+  glfw_error_logging_enabled_ = enable;
+  INFO("GLFW error callback logging enabled: {}", enable);
+}
+
+void GlfwWindow::ToggleOpenGlErrorLogging(const bool enable) {
+  if (GLAD_GL_KHR_debug == 0) {
+    return;
+  }
+  if (gl_debug_logging_enabled_ == enable) {
+    return;
+  }
+  if (enable) {
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(&GlDebugPrintCallback, nullptr);
+  } else {
+    glDisable(GL_DEBUG_OUTPUT);
+  }
+  gl_debug_logging_enabled_ = enable;
+  INFO("OpenGL debug callback logging enabled: {}", enable);
 }
 
 GLFWwindow *GlfwWindow::GetGlfwWindowPtr() {
@@ -60,8 +117,8 @@ Size2D GlfwWindow::GetWindowSize() {
 }
 
 void GlfwWindow::SetWindowSize(const Size2D &size) {
-  ASSERT(size.Width() > 0 && size.Height() > 0,
-         "Width & height must be > 0, got {}", to_string(size));
+  ASSERT(size.Width() && size.Height(), "Width & height must be > 0, got {}",
+         to_string(size));
   glfwSetWindowSize(glfw_window_ptr_, size.Width(), size.Height());
   DEBUG("Set window size to {}.", to_string(size));
 }
@@ -201,7 +258,7 @@ void GlfwWindow::ToggleAlphaBlending(const bool &enable_alpha_blending) {
 }
 
 void GlfwWindow::ToggleFaceCull(const bool &enable_face_cull,
-                                const FaceCullSetting &face_cull_setting) {
+                                const FaceCullMode &face_cull_setting) {
   if (enable_face_cull == ctx_.enable_face_cull) {
     return;
   }
@@ -282,9 +339,9 @@ void GlfwWindow::DebugUI() {
       ToggleFaceCull(ctx.enable_face_cull, ctx.face_cull_setting);
       if (ctx.enable_face_cull) {
         int mode = static_cast<int>(ctx.face_cull_setting);
-        if (ImGui::Combo("Cull Mode", &mode, kCullModeNames,
-                         IM_ARRAYSIZE(kCullModeNames))) {
-          ctx.face_cull_setting = static_cast<FaceCullSetting>(mode);
+        if (ImGui::Combo("Cull Mode", &mode, kFaceCullModeNames,
+                         IM_ARRAYSIZE(kFaceCullModeNames))) {
+          ctx.face_cull_setting = static_cast<FaceCullMode>(mode);
         }
       }
     }

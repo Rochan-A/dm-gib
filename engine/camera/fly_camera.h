@@ -1,7 +1,9 @@
 #pragma once
 
 #include "engine/camera/camera_base.h"
+#include "engine/core/input.h"
 #include "engine/core/types.h"
+#include <limits>
 
 namespace gib {
 
@@ -13,7 +15,7 @@ static constexpr float kMinSensitivity = 0.01f;
 static constexpr float kMaxSensitivity = 10.f;
 
 static constexpr float kMinVelocity = 0.1f;
-static constexpr float kMaxVelocity = 100.f;
+static constexpr float kMaxVelocity = 10.f;
 
 // Fly camera model.
 class FlyCameraModel final : public BaseCamera<FlyCameraModel> {
@@ -41,54 +43,62 @@ public:
     }
   }
 
-  void ProcessKeyboardImpl(const Directions &direction,
-                           const float &dt_seconds) noexcept override {
+  void ProcessInputImpl(const Input &input,
+                        const float &dt_seconds) noexcept override {
     const float displacement = ctx_.velocity.Get() * dt_seconds;
     if (displacement == 0.0f) {
       return;
     }
 
-    switch (direction) {
-    case Directions::FORWARD:
+    if (input.key_state[GLFW_KEY_W] == KeyAction::PRESS ||
+        input.key_state[GLFW_KEY_W] == KeyAction::REPEAT) {
       position_ += front_ * displacement;
-      break;
-    case Directions::BACKWARD:
+    } else if (input.key_state[GLFW_KEY_S] == KeyAction::PRESS ||
+               input.key_state[GLFW_KEY_S] == KeyAction::REPEAT) {
       position_ -= front_ * displacement;
-      break;
-    case Directions::LEFT:
+    } else if (input.key_state[GLFW_KEY_A] == KeyAction::PRESS ||
+               input.key_state[GLFW_KEY_A] == KeyAction::REPEAT) {
       position_ -= right_ * displacement;
-      break;
-    case Directions::RIGHT:
+    } else if (input.key_state[GLFW_KEY_D] == KeyAction::PRESS ||
+               input.key_state[GLFW_KEY_D] == KeyAction::REPEAT) {
       position_ += right_ * displacement;
-      break;
-    case Directions::UP:
+    } else if (input.key_state[GLFW_KEY_SPACE] == KeyAction::PRESS ||
+               input.key_state[GLFW_KEY_SPACE] == KeyAction::REPEAT) {
       position_ += world_up_ * displacement;
-      break;
-    case Directions::DOWN:
+    } else if (input.key_state[GLFW_KEY_LEFT_SHIFT] == KeyAction::PRESS ||
+               input.key_state[GLFW_KEY_LEFT_SHIFT] == KeyAction::REPEAT) {
       position_ -= world_up_ * displacement;
-      break;
-    default:
-      break;
+    } else if (input.key_state[GLFW_KEY_Q] == KeyAction::PRESS ||
+               input.key_state[GLFW_KEY_Q] == KeyAction::REPEAT) {
+      position_ += world_up_ * displacement;
+    } else if (input.key_state[GLFW_KEY_E] == KeyAction::PRESS ||
+               input.key_state[GLFW_KEY_E] == KeyAction::REPEAT) {
+      position_ -= world_up_ * displacement;
     }
-  }
 
-  void
-  ProcessMouseMovementImpl(const float &x_offset_pixels,
-                           const float &y_offset_pixels) noexcept override {
-    yaw_ += x_offset_pixels * ctx_.sensitivity.Get();
-    pitch_ += y_offset_pixels * ctx_.sensitivity.Get();
+    if (last_mouse_pos_.x == std::numeric_limits<float>::infinity()) {
+      last_mouse_pos_ = input.mouse_pos;
+    }
+    const Offset delta = input.mouse_pos - last_mouse_pos_;
+    yaw_ += delta.x * ctx_.sensitivity.Get();
+    // Invert y
+    pitch_ += -delta.y * ctx_.sensitivity.Get();
     // Pitch is constrained.
     pitch_ = std::clamp(pitch_, kPitchMin, kPitchMax);
-  }
+    last_mouse_pos_ = input.mouse_pos;
 
-  void ProcessMouseScrollImpl(const float &y_offset) noexcept override {
-    // GLFW: positive y_offset means scroll up (zoom in / narrower FOV)
-    fov_.Set(fov_.Get() - y_offset);
+    if (input.scroll_offset.y != 0.0f) {
+      // GLFW: positive y_offset means scroll up (zoom in / narrower FOV)
+      fov_.Set(fov_.Get() - input.scroll_offset.y);
+    }
   }
 
   DISALLOW_COPY_AND_ASSIGN(FlyCameraModel);
 
 private:
+  Offset last_mouse_pos_{std::numeric_limits<float>::infinity(),
+                         std::numeric_limits<float>::infinity()};
+
   struct FlyCameraContext {
     // Mouse sensitivity (deg/px)
     BoundedType<float> sensitivity{kMinSensitivity, kMaxSensitivity,

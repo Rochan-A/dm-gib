@@ -1,19 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 cc_library(
-    name = "gl_core",
-    srcs = ["gl_core.cc"],
-    hdrs = ["gl_core.h"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//third_party/glad",
-        "//util:macros",
-        "//util/report",
-        "@glfw",
-    ],
-)
-
-cc_library(
     name = "frame_util",
     srcs = ["frame_util.h"],
     visibility = ["//visibility:public"],
@@ -47,7 +34,6 @@ cc_library(
     deps = [
         ":frame_util",
         ":types",
-        "//engine/core:gl_core",
         "//engine/core:input",
         "//third_party/glad",
         "//util:macros",
@@ -68,23 +54,17 @@ cc_library(
 
 cc_library(
     name = "core",
-    srcs = [
-        "gl_core.cc",
-        "gl_window.cc",
-    ],
+    srcs = ["gl_window.cc"],
     hdrs = [
         "frame_util.h",
-        "gl_core.h",
         "gl_window.h",
         "input.h",
         "types.h",
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":gl_core",
         ":gl_window",
         ":types",
-        "//third_party/glad",
         "//third_party/imgui",
         "//util:macros",
         "//util/report",
