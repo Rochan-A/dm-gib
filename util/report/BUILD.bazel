@@ -10,5 +10,6 @@ cc_library(
         "//third_party/glad",
         "//util/time",
         "@fmt",
+        "@tracy",  # keep
     ],
 )

@@ -13,8 +13,11 @@
 
 #include <cstring>
 #include <execinfo.h>
+#include <tracy/Tracy.hpp>
 
 #include "util/time/time.h"
+
+// TODO(rochan): Pull in cpptrace for pretty stack trace printing.
 
 namespace report {
 
@@ -82,20 +85,15 @@ inline std::string CurrentSystemTimeString() {
   auto now = SystemClock::now();
   std::time_t const now_c = SystemClock::to_time_t(now);
 
-  char buf[100];
+  char buf[20];
   std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", std::localtime(&now_c));
   return {buf};
 }
 
 // Throws a std::runtime_error with a stack trace.
-inline void ThrowFatalError(const char *file, int line, const char *func,
-                            const std::string &msg) {
-  std::string stacktrace = GetStackTrace(2);
-  std::string const full_message =
-      fmt::format("FATAL ERROR at {}:{} in {}:\n{}\nStack trace:\n{}", file,
-                  line, func, msg, stacktrace);
-
-  throw std::runtime_error(full_message);
+inline void ThrowFatalError(const std::string &msg, const int skip_frames) {
+  throw std::runtime_error(
+      fmt::format("{}\nStack trace:\n{}", msg, GetStackTrace(skip_frames)));
 }
 
 // ANSI colours (bright so they show up on light or dark themes)
@@ -115,30 +113,53 @@ inline void LogMessage(const char *level, const char *file, const int line,
                       : (level[0] == 'A') ? ansi::kRed
                                           : ansi::kReset;
 
-  std::cerr << fmt::format("{}{} {} [{:11.6f}] {}:{} {}{}\n", color, level,
-                           CurrentSystemTimeString(), MonotonicTimeSeconds(),
-                           file, line, msg, ansi::kReset);
+  const auto base_log =
+      fmt::format("{} [{:11.6f}] {}:{} {}", CurrentSystemTimeString(),
+                  MonotonicTimeSeconds(), file, line, msg);
+  std::cerr << fmt::format("{}{} {}{}\n", color, level, base_log, ansi::kReset);
+
+#ifdef TRACY_ENABLE
+  auto tracy_color = tracy::Color::Cyan;
+  switch (level[0]) {
+  case 'W':
+    tracy_color = tracy::Color::Yellow;
+    break;
+  case 'D':
+    tracy_color = tracy::Color::Green;
+    break;
+  case 'A':
+    tracy_color = tracy::Color::Red;
+    break;
+  }
+  TracyMessageC(base_log.c_str(), base_log.size(), tracy_color);
+#endif
 }
 
 } // namespace report
 
-// kdebug_break  (works on GCC/Clang/MSVC; harmless on others)
+// kdebug_break_internal  (works on GCC/Clang/MSVC; harmless on others)
 #if defined(__has_builtin) && !defined(__ibmxl__)
 #if __has_builtin(__builtin_debugtrap)
-#define kdebug_break() __builtin_debugtrap()
+#define kdebug_break_internal() __builtin_debugtrap()
 #elif __has_builtin(__debugbreak)
-#define kdebug_break() __debugbreak()
+#define kdebug_break_internal() __debugbreak()
 #endif
 #endif
-#if !defined(kdebug_break)
+#if !defined(kdebug_break_internal)
 #if defined(__clang__) || defined(__gcc__)
-#define kdebug_break() __builtin_trap()
+#define kdebug_break_internal() __builtin_trap()
 #elif defined(_MSC_VER)
 #include <intrin.h>
-#define kdebug_break() __debugbreak()
+#define kdebug_break_internal() __debugbreak()
+#else
+#define kdebug_break_internal() ((void)0)
+#endif
+#endif
+
+#ifdef TRAP_DEBUG
+#define kdebug_break() kdebug_break_internal()
 #else
 #define kdebug_break() ((void)0)
-#endif
 #endif
 
 #define DEBUG(msg, ...)                                                        \
@@ -154,25 +175,28 @@ inline void LogMessage(const char *level, const char *file, const int line,
                      fmt::format(msg, ##__VA_ARGS__))
 
 #define THROW_FATAL(msg, ...)                                                  \
-  report::ThrowFatalError(__FILE__, __LINE__, __func__,                        \
-                          fmt::format(msg, ##__VA_ARGS__))
+  do {                                                                         \
+    const auto log =                                                           \
+        fmt::format("FATAL ERROR: {}", fmt::format(msg, ##__VA_ARGS__));       \
+    report::LogMessage("A", __FILE__, __LINE__, __func__, log);                \
+    kdebug_break();                                                            \
+    report::ThrowFatalError(log, 1);                                           \
+  } while (0)
 
 #define ASSERT(expr, msg, ...)                                                 \
   do {                                                                         \
     if (!(expr)) {                                                             \
-      report::LogMessage("A", __FILE__, __LINE__, __func__,                    \
-                         fmt::format("Assertion failed: {}. {}", #expr,        \
-                                     fmt::format(msg, ##__VA_ARGS__)));        \
+      const auto log = fmt::format("Assertion failed: {}. {}", #expr,          \
+                                   fmt::format(msg, ##__VA_ARGS__));           \
+      report::LogMessage("A", __FILE__, __LINE__, __func__, log);              \
       kdebug_break();                                                          \
-      report::ThrowFatalError(__FILE__, __LINE__, __func__,                    \
-                              fmt::format("Assertion failed: {}. {}", #expr,   \
-                                          fmt::format(msg, ##__VA_ARGS__)));   \
+      report::ThrowFatalError(log, 2);                                         \
     }                                                                          \
   } while (0)
 
 #define CHECK_GL_ERROR()                                                       \
   do {                                                                         \
-    GLenum error = glGetError();                                               \
+    const GLenum error = glGetError();                                         \
     ASSERT(error == GL_NO_ERROR, "ERROR::GL::{}",                              \
            report::GlErrorToString(error));                                    \
   } while (0)
@@ -184,8 +208,7 @@ static constexpr int kMaxLogLength = 1024;
     if (static_cast<int>(success) == 0) {                                      \
       char error[kMaxLogLength];                                               \
       get_log_func(log_func_arg, kMaxLogLength, nullptr, error);               \
-      report::ThrowFatalError(                                                 \
-          __FILE__, __LINE__, __func__,                                        \
-          fmt::format("Failed to link program: {}", error));                   \
+      report::LogMessage("A", __FILE__, __LINE__, __func__,                    \
+                         fmt::format("Failed to link program: {}", error));    \
     }                                                                          \
   } while (0)

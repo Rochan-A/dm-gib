@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "engine/core/gl_core.h"
 #include "engine/core/gl_window.h"
 
 #include <glm/glm.hpp>
@@ -27,26 +26,19 @@ static constexpr int kMaxBoneInfulence = 4;
 
 namespace assimp_util {
 
-struct AssimpVertex {
-  glm::vec3 position;
-  glm::vec3 color;
-  glm::vec2 texture_coords;
-  glm::vec3 normal;
-  glm::vec3 tangent;
-  glm::vec3 bitangent;
-  // Bone indexes which will influence this vertex
-  int bone_ids[kMaxBoneInfulence];
-  // Weights from each bone
-  float bone_weights[kMaxBoneInfulence];
-};
-
 class Model {
-  using Vertex = AssimpVertex;
 
 public:
   explicit Model(const std::string &path, bool lazy_load = false);
 
+  // Loads the model if not loaded.
   void LoadModel();
+
+  [[nodiscard]] std::vector<gib::Texture> GetLoadedTexture() const {
+    return textures_loaded_;
+  }
+
+  [[nodiscard]] std::vector<gib::Mesh> GetMeshes() const { return meshes_; }
 
 private:
   gib::Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);

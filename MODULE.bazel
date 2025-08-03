@@ -7,6 +7,7 @@ bazel_dep(name = "fmt", version = "11.1.4")
 bazel_dep(name = "assimp", version = "5.4.3.bcr.6")
 bazel_dep(name = "glm", version = "1.0.1")
 bazel_dep(name = "stb", version = "0.0.0-20241109-5c20573")
+bazel_dep(name = "bazel_skylib", version = "1.8.1")
 
 bazel_dep(name = "gazelle", version = "0.42.0")
 bazel_dep(name = "gazelle_cc", version = "0.1.0")
@@ -37,4 +38,18 @@ http_archive(
     strip_prefix = "tracy-0.11.1",
     build_file = "@//:tracy.BUILD",
     sha256 = "2c11ca816f2b756be2730f86b0092920419f3dabc7a7173829ffd897d91888a1",
+)
+
+bazel_dep(name = "lock_free_work_pool", dev_dependency = True)
+git_override(
+    module_name = "lock_free_work_pool",
+    remote = "https://github.com/Rochan-A/lock-free-work-pool.git",
+    commit = "66082ab4b4b4dc25340b34ca5ada97245cdd5449",
+)
+
+bazel_dep(name = "handle_pool", dev_dependency = True)
+git_override(
+    module_name = "handle_pool",
+    remote = "https://github.com/Rochan-A/memory_handle_pool_allocator.git",
+    commit = "b572cba16007aa7587cb7fe23f9c79474e771140"
 )

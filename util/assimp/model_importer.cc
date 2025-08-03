@@ -50,12 +50,12 @@ void Model::ProcessNode(aiNode *node, const aiScene *scene) {
 
 gib::Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
   // data to fill
-  std::vector<Vertex> vertices;
+  std::vector<gib::Vertex> vertices;
   std::vector<unsigned int> indices;
   std::vector<gib::Texture> textures;
 
   for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-    Vertex vertex;
+    gib::Vertex vertex;
     glm::vec3 vector;
     // we declare a placeholder vector since assimp uses its
     // own vector class that doesn't directly convert to
@@ -151,7 +151,7 @@ Model::LoadMaterialTextures(aiMaterial *material,
 
     const gib::TextureParams params{};
     const gib::Texture texture = gib::Texture::Load2D(
-        fmt::format("{}/{}", directory_, texture_path), params);
+        fmt::format("{}/{}", directory_, texture_path.C_Str()), params);
     textures.push_back(texture);
     textures_loaded_.push_back(texture);
   }

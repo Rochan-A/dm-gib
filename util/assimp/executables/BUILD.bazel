@@ -8,10 +8,10 @@ cc_binary(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//engine/core:gl_core",
         "//engine/core:gl_window",
         "//third_party/concise_args",
         "//third_party/glad",
+        "//util/assimp:model_importer",
         "//util/report",
         "@assimp",
         "@glfw",
