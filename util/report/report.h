@@ -174,6 +174,10 @@ inline void LogMessage(const char *level, const char *file, const int line,
   report::LogMessage("I", __FILE__, __LINE__, __func__,                        \
                      fmt::format(msg, ##__VA_ARGS__))
 
+#define ERROR(msg, ...)                                                        \
+  report::LogMessage("A", __FILE__, __LINE__, __func__,                        \
+                     fmt::format(msg, ##__VA_ARGS__))
+
 #define THROW_FATAL(msg, ...)                                                  \
   do {                                                                         \
     const auto log =                                                           \

@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 
-#include <stb/stb_image.h>
-
 #include "util/report/report.h"
 #include <glm/glm.hpp>
 

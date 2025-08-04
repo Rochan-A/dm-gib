@@ -129,7 +129,35 @@ TextureMapTypeToAssimpTextureTypes(const TextureMapType type) {
   case TextureMapType::NORMAL:
     return {aiTextureType_NORMALS};
   default:
-    THROW_FATAL("ERROR::TEXTURE_MAP::INVALID_TEXTURE_MAP_TYPE {}", type);
+    THROW_FATAL("ERROR::TEXTURE_MAP::INVALID_TEXTURE_MAP_TYPE {}",
+                static_cast<int>(type));
+  }
+}
+
+inline std::string TextureMapTypeToString(const TextureMapType type) {
+  switch (type) {
+  case TextureMapType::DIFFUSE:
+    return "u_Diffuse";
+  case TextureMapType::SPECULAR:
+    // Use metalness for specularity as well. When this is loaded as a
+    // combined "metalnessRoughnessTexture", shaders should read the blue
+    // channel.
+    return "u_Specular";
+  case TextureMapType::ROUGHNESS:
+    return "u_Roughness";
+  case TextureMapType::METALLIC:
+    return "u_Metallic";
+  case TextureMapType::AO:
+    // For whatever reason, assimp stores AO maps as "lightmaps", even though
+    // there's AssimpTextureType_AMBIENT_OCCLUSION...
+    return "u_AmbientOcclusion";
+  case TextureMapType::EMISSION:
+    return "u_Emmision";
+  case TextureMapType::NORMAL:
+    return "u_Normal";
+  default:
+    THROW_FATAL("ERROR::TEXTURE_MAP::INVALID_TEXTURE_MAP_TYPE {}",
+                static_cast<int>(type));
   }
 }
 

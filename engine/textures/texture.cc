@@ -2,6 +2,9 @@
 #include "engine/textures/texture_utils.h"
 #include "util/report/report.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 namespace gib {
 
 Texture Texture::Load2D(const std::string &path, const TextureParams &params,
@@ -241,7 +244,7 @@ void Texture::BindToUnit(unsigned int texture_unit, TextureBindType bind_type) {
     default:
       THROW_FATAL("TextureBindType was BY_TEXTURE_TYPE but TextureType is "
                   "un-supported {}",
-                  type_);
+                  static_cast<int>(type_));
     }
   }
 
@@ -261,7 +264,7 @@ void Texture::BindToUnit(unsigned int texture_unit, TextureBindType bind_type) {
     //                    internal_format_);
     // break;
   default:
-    THROW_FATAL("Invalid TextureBindType {}", bind_type);
+    THROW_FATAL("Invalid TextureBindType {}", static_cast<int>(bind_type));
   }
 }
 
@@ -320,7 +323,8 @@ void Texture::ApplyTextureParams(const TextureParams &params,
     }
     break;
   default:
-    THROW_FATAL("Invalid TextureFiltering value {}!", params.filtering);
+    THROW_FATAL("Invalid TextureFiltering value {}!",
+                static_cast<int>(params.filtering));
   }
 
   switch (params.wrap_mode) {
@@ -355,7 +359,8 @@ void Texture::ApplyTextureParams(const TextureParams &params,
                      glm::value_ptr(params.border_color));
     break;
   default:
-    THROW_FATAL("Invalid TextureWrapMode value {}!", params.wrap_mode);
+    THROW_FATAL("Invalid TextureWrapMode value {}!",
+                static_cast<int>(params.wrap_mode));
   }
 
   switch (params.mip_filtering) {
@@ -378,7 +383,8 @@ void Texture::ApplyTextureParams(const TextureParams &params,
                     GL_NEAREST_MIPMAP_NEAREST);
     break;
   default:
-    THROW_FATAL("Invalid MipFiltering value {}!", params.mip_filtering);
+    THROW_FATAL("Invalid MipFiltering value {}!",
+                static_cast<int>(params.mip_filtering));
   }
 }
 

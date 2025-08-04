@@ -101,10 +101,10 @@ private:
 
   struct FlyCameraContext {
     // Mouse sensitivity (deg/px)
-    BoundedType<float> sensitivity{kMinSensitivity, kMaxSensitivity,
-                                   kMinSensitivity};
+    BoundedType<float> sensitivity{kMinSensitivity, kMinSensitivity,
+                                   kMaxSensitivity};
     // World‑units/s
-    BoundedType<float> velocity{kMinVelocity, kMaxVelocity, kMinVelocity};
+    BoundedType<float> velocity{kMinVelocity, kMinVelocity, kMaxVelocity};
   };
 
   FlyCameraContext ctx_;

@@ -94,7 +94,7 @@ protected:
   float pitch_;
 
   // Field‑of‑view (degrees)
-  BoundedType<float> fov_{kFovMax, kFovMax, kFovMin};
+  BoundedType<float> fov_{kFovMax, kFovMin, kFovMax};
 
   bool update_enabled_;
 

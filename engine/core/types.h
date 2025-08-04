@@ -28,16 +28,26 @@ inline std::string to_string(const Size2D &size) {
 // value.
 template <typename ValueType> class BoundedType {
 public:
-  constexpr BoundedType(const ValueType value, const ValueType max,
-                        const ValueType min)
+  constexpr BoundedType(const ValueType value, const ValueType min,
+                        const ValueType max)
       : value_(value), max_(max), min_(min) {}
 
   inline void Set(const ValueType &value) {
     value_ = std::clamp(value, min_, max_);
   }
-  [[nodiscard]] inline const ValueType &Get() const { return value_; }
-  [[nodiscard]] inline const ValueType &GetMin() const { return min_; }
-  [[nodiscard]] inline const ValueType &GetMax() const { return max_; }
+  [[nodiscard]] inline ValueType Get() const { return value_; }
+  [[nodiscard]] inline ValueType GetMin() const { return min_; }
+  [[nodiscard]] inline ValueType GetMax() const { return max_; }
+
+  BoundedType(const BoundedType &other)
+      : value_(other.Get()), max_(other.GetMax()), min_(other.GetMin()) {}
+  BoundedType &operator=(const BoundedType &other) {
+    value_ = other.GetValue();
+    max_ = other.GetMax();
+    min_ = other.GetMin();
+  }
+  BoundedType(BoundedType &&other) = delete;
+  BoundedType &operator=(BoundedType &&other) = delete;
 
 private:
   ValueType value_;
