@@ -1,0 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "mesh",
+    srcs = ["mesh_primitives.cc"],
+    hdrs = [
+        "mesh.h",
+        "mesh_primitives.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//engine/materials",
+        "//engine/textures:texture",
+        "//engine/vertex_util",
+        "//engine/vertex_util:types",
+        "//engine/vertex_util:vertex_array",
+        "//util:macros",
+        "@glm",
+    ],
+)
