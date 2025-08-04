@@ -1,0 +1,12 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "materials",
+    srcs = ["material.cc"],
+    hdrs = ["material.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//engine/core:types",
+        "@glm",
+    ],
+)
