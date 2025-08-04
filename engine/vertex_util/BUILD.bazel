@@ -24,12 +24,14 @@ cc_library(
     hdrs = [
         "types.h",
         "vertex_array.h",
+        "vertex_layout.h",
     ],
     visibility = ["//visibility:public"],
     deps = [
         ":types",
         ":vertex_array",
         "//third_party/glad",
+        "//util:macros",
         "//util/report",
     ],
 )
